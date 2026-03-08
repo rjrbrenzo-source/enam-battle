@@ -47,8 +47,28 @@ margin:5px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:12px;
+font-size:14px;
 background:white;
+}
+
+#courses{
+background:white;
+padding:10px;
+margin:10px;
+border-radius:10px;
+font-weight:bold;
+}
+
+#timer{
+font-size:20px;
+margin:10px;
+}
+
+#winnerBox{
+font-size:22px;
+font-weight:bold;
+margin:20px;
+color:#cc6600;
 }
 
 </style>
@@ -59,6 +79,14 @@ background:white;
 
 <h1>ENAM Battle</h1>
 
+<div id="courses">
+Curso 1: Ginecología | Curso 2: Neurología
+</div>
+
+<div id="timer"></div>
+
+<div id="winnerBox"></div>
+
 <h2>Jugador</h2>
 
 <button onclick="setPlayer('Renzo')">Soy Renzo</button>
@@ -68,27 +96,26 @@ background:white;
 
 <h2>Tareas</h2>
 
-<button id="t0" onclick="task(0)">Curso 1 qx: Resumen base</button>
-<button id="t1" onclick="task(1)">Curso 1 qx: Eva</button>
-<button id="t2" onclick="task(2)">Curso 1 qx: Estudia conmigo</button>
-<button id="t3" onclick="task(3)">Curso 2 Usa: Org mental</button>
-<button id="t4" onclick="task(4)">Curso 2 Usa: Resumen base</button>
-<button id="t5" onclick="task(5)">Curso 2 Usa: Banqueo</button>
-<button id="t6" onclick="task(6)">Curso 2 Usa: Casos esenciales</button>
+<button id="t0" onclick="task(0)">Curso 1: Resumen base</button>
+<button id="t1" onclick="task(1)">Curso 1: Eva</button>
+<button id="t2" onclick="task(2)">Curso 1: Estudia conmigo</button>
+<button id="t3" onclick="task(3)">Curso 2: Org mental</button>
+<button id="t4" onclick="task(4)">Curso 2: Resumen base</button>
+<button id="t5" onclick="task(5)">Curso 2: Banqueo</button>
+<button id="t6" onclick="task(6)">Curso 2: Casos esenciales</button>
 
 <h2>Tablero</h2>
 
 <div class="board">
 
-<div class="cell" id="c0">Inicio</div>
+<div class="cell" id="c0">0</div>
 <div class="cell" id="c1">1</div>
 <div class="cell" id="c2">2</div>
 <div class="cell" id="c3">3</div>
 <div class="cell" id="c4">4</div>
 <div class="cell" id="c5">5</div>
 <div class="cell" id="c6">6</div>
-<div class="cell" id="c7">7</div>
-<div class="cell" id="c8">🏁</div>
+<div class="cell" id="c7">🏁 Meta</div>
 
 </div>
 
@@ -98,8 +125,6 @@ Renzo: <span id="renzo">0</span>
 <br><br>
 Anita: <span id="anita">0</span>
 
-<h2 id="leader"></h2>
-
 <script>
 
 let player=""
@@ -107,24 +132,30 @@ let player=""
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 
 const tareas=[
-"Curso 1 qx: Resumen base",
-"Curso 1 qx: Eva",
-"Curso 1 qx: Estudia conmigo",
-"Curso 2 Usa: Org mental",
-"Curso 2 Usa: Resumen base",
-"Curso 2 Usa: Banqueo",
-"Curso 2 Usa: Casos esenciales"
+"Curso 1: Resumen base",
+"Curso 1: Eva",
+"Curso 1: Estudia conmigo",
+"Curso 2: Org mental",
+"Curso 2: Resumen base",
+"Curso 2: Banqueo",
+"Curso 2: Casos esenciales"
 ]
+
+const deadline=new Date("2026-03-15T23:00:00")
 
 function setPlayer(p){
 
 player=p
 document.getElementById("player").innerText="Jugador: "+p
-loadScore()
 
 }
 
 function task(i){
+
+if(new Date()>deadline){
+alert("La competencia terminó")
+return
+}
 
 if(player==""){
 alert("Selecciona jugador")
@@ -180,15 +211,7 @@ updateTasks(estado)
 
 drawPieces(renzoScore,anitaScore)
 
-if(renzoScore>anitaScore){
-document.getElementById("leader").innerText="🏆 Renzo va ganando"
-}
-else if(anitaScore>renzoScore){
-document.getElementById("leader").innerText="🏆 Anita va ganando"
-}
-else{
-document.getElementById("leader").innerText="Empate"
-}
+checkWinner(renzoScore,anitaScore)
 
 })
 
@@ -232,15 +255,63 @@ btn.classList.add("anitaColor")
 
 function drawPieces(r,a){
 
-for(let i=0;i<=8;i++){
-document.getElementById("c"+i).innerHTML=i==0?"Inicio":i
+for(let i=0;i<=7;i++){
+document.getElementById("c"+i).innerHTML=i==7?"🏁 Meta":i
 }
 
-document.getElementById("c"+r).innerHTML+=" R"
-document.getElementById("c"+a).innerHTML+=" A"
+if(r<=7) document.getElementById("c"+r).innerHTML+=" R"
+if(a<=7) document.getElementById("c"+a).innerHTML+=" A"
 
 }
 
+function checkWinner(r,a){
+
+if(r>=7){
+document.getElementById("winnerBox").innerText="🏆 Renzo llegó a META y ganó"
+}
+
+if(a>=7){
+document.getElementById("winnerBox").innerText="🏆 Anita llegó a META y ganó"
+}
+
+if(new Date()>deadline){
+
+if(r>a){
+document.getElementById("winnerBox").innerText="⏰ Tiempo terminado. Ganador: Renzo 🏆"
+}
+
+else if(a>r){
+document.getElementById("winnerBox").innerText="⏰ Tiempo terminado. Ganadora: Anita 🏆"
+}
+
+else{
+document.getElementById("winnerBox").innerText="⏰ Empate"
+}
+
+}
+
+}
+
+function updateTimer(){
+
+const now=new Date()
+
+const diff=deadline-now
+
+if(diff<=0){
+document.getElementById("timer").innerText="⏰ Competencia terminada"
+return
+}
+
+const d=Math.floor(diff/1000/60/60/24)
+const h=Math.floor(diff/1000/60/60)%24
+const m=Math.floor(diff/1000/60)%60
+
+document.getElementById("timer").innerText="Deadline: "+d+"d "+h+"h "+m+"m"
+
+}
+
+setInterval(updateTimer,1000)
 setInterval(loadScore,3000)
 
 </script>
