@@ -38,15 +38,9 @@ border-radius:10px;
 opacity:0.4;
 }
 
-table{
-margin:auto;
-border-collapse:collapse;
-margin-top:10px;
-}
-
-td,th{
-border:1px solid white;
-padding:8px;
+.puntaje{
+font-size:20px;
+margin:10px;
 }
 
 </style>
@@ -60,7 +54,7 @@ padding:8px;
 <h3>Curso 1: Ginecología</h3>
 <h3>Curso 2: Neurología</h3>
 
-<h3>Seleccionar jugador</h3>
+<h3>Selecciona jugador</h3>
 
 <button onclick="setJugador('Renzo')">Jugador Renzo</button>
 <button onclick="setJugador('Anita')">Jugador Anita</button>
@@ -70,7 +64,7 @@ padding:8px;
 <h2>⏳ Tiempo restante</h2>
 <h2 id="timer"></h2>
 
-<button onclick="verPuntaje()">📊 Puntaje</button>
+<button onclick="verCompetencia()">🏁 Competencia</button>
 <button onclick="verTareas()">📚 Tareas</button>
 <button onclick="configurarDeadline()">⏱ Deadline</button>
 
@@ -102,7 +96,7 @@ document.getElementById("jugador").innerText="Jugador: "+jugador
 
 }
 
-function verPuntaje(){
+function verCompetencia(){
 
 fetch(API+"?accion=ranking")
 
@@ -122,29 +116,19 @@ if(j.nombre=="Anita") anita=j.puntos
 
 let html=`
 
-<h2>📊 Tabla de Puntaje</h2>
+<h2>🏁 Competencia</h2>
 
-<table>
+<div class="puntaje">
 
-<tr>
-<th>Jugador</th>
-<th>Puntos</th>
-<th>Meta</th>
-</tr>
+Renzo: ${renzo} / 7 puntos
 
-<tr>
-<td>Renzo</td>
-<td>${renzo}</td>
-<td>7</td>
-</tr>
+</div>
 
-<tr>
-<td>Anita</td>
-<td>${anita}</td>
-<td>7</td>
-</tr>
+<div class="puntaje">
 
-</table>
+Anita: ${anita} / 7 puntos
+
+</div>
 
 `
 
@@ -181,9 +165,11 @@ tareas.forEach(t=>{
 let r=data.Renzo?.includes(t)
 let a=data.Anita?.includes(t)
 
+let bloqueada = (jugador=="Renzo" && r) || (jugador=="Anita" && a)
+
 html+=`
 
-<div class="tarea ${r&&jugador=='Renzo'||a&&jugador=='Anita'?'bloqueada':''}">
+<div class="tarea ${bloqueada?'bloqueada':''}">
 
 ${t}
 
@@ -194,8 +180,7 @@ Anita: ${a?"✅":"⬜"}
 
 <br>
 
-<button onclick="completar('${t}')" 
-${r&&jugador=='Renzo'||a&&jugador=='Anita'?'disabled':''}>
+<button onclick="completar('${t}')" ${bloqueada?'disabled':''}>
 
 Completar
 
@@ -228,8 +213,7 @@ fetch(API+"?accion=tarea&jugador="+jugador+"&tarea="+t)
 alert("Tarea completada")
 
 verTareas()
-
-verPuntaje()
+verCompetencia()
 
 }
 
@@ -243,11 +227,7 @@ let html=`
 
 <br><br>
 
-<button onclick="guardarDeadline()">
-
-Guardar
-
-</button>
+<button onclick="guardarDeadline()">Guardar</button>
 
 `
 
@@ -273,6 +253,14 @@ fetch(API+"?accion=deadline")
 
 .then(d=>{
 
+if(!d){
+
+document.getElementById("timer").innerText="Configurar deadline"
+
+return
+
+}
+
 let deadline=new Date(d)
 
 setInterval(()=>{
@@ -281,9 +269,9 @@ let now=new Date()
 
 let diff=deadline-now
 
-if(diff<0){
+if(diff<=0){
 
-document.getElementById("timer").innerText="FIN"
+terminarJuego()
 
 return
 
@@ -303,13 +291,49 @@ h+"h "+m+"m "+s+"s"
 
 }
 
+function terminarJuego(){
+
+fetch(API+"?accion=ranking")
+
+.then(r=>r.json())
+
+.then(data=>{
+
+let renzo=0
+let anita=0
+
+data.forEach(j=>{
+
+if(j.nombre=="Renzo") renzo=j.puntos
+if(j.nombre=="Anita") anita=j.puntos
+
+})
+
+if(renzo>anita){
+
+ganador("Renzo")
+
+}else if(anita>renzo){
+
+ganador("Anita")
+
+}else{
+
+empate()
+
+}
+
+})
+
+}
+
 function ganador(n){
 
 document.getElementById("contenido").innerHTML=
 
 `
 
-<h1>🏆 ${n} GANÓ</h1>
+<h1>🏆 GANADOR: ${n}</h1>
 
 <h2>Premio de pareja ❤️</h2>
 
@@ -317,11 +341,29 @@ document.getElementById("contenido").innerHTML=
 
 💋 10 besos
 
-🍝 Cena romántica
+🍝 cena romántica
 
-💆 Masaje relajante
+💆 masaje relajante
 
-🎬 Elegir película
+🎬 elegir película juntos
+
+</p>
+
+`
+
+}
+
+function empate(){
+
+document.getElementById("contenido").innerHTML=
+
+`
+
+<h1>🤝 Empate</h1>
+
+<p>
+
+Ambos deben celebrar con una salida juntos ❤️
 
 </p>
 
@@ -334,4 +376,5 @@ iniciarTimer()
 </script>
 
 </body>
+
 </html>
