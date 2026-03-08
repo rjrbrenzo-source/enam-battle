@@ -7,6 +7,8 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
+<link rel="manifest" href="manifest.json">
+
 <style>
 
 body{
@@ -28,17 +30,17 @@ font-size:16px;
 
 .tablero{
 display:grid;
-grid-template-columns:repeat(7,50px);
-gap:6px;
+grid-template-columns:repeat(4,70px);
+gap:8px;
 justify-content:center;
 margin-top:20px;
 }
 
 .casilla{
-width:50px;
-height:50px;
+width:70px;
+height:70px;
 background:#1e293b;
-border-radius:10px;
+border-radius:12px;
 position:relative;
 }
 
@@ -47,29 +49,45 @@ background:#22c55e;
 }
 
 .renzo{
-width:20px;
-height:20px;
+width:22px;
+height:22px;
 background:#22c55e;
 border-radius:50%;
 position:absolute;
-top:15px;
-left:6px;
+top:22px;
+left:8px;
+transition:all 0.4s;
 }
 
 .anita{
-width:20px;
-height:20px;
+width:22px;
+height:22px;
 background:#f43f5e;
 border-radius:50%;
 position:absolute;
-top:15px;
-right:6px;
+top:22px;
+right:8px;
+transition:all 0.4s;
 }
 
 .tarea{
 background:#1e293b;
 margin:8px;
 padding:10px;
+border-radius:10px;
+}
+
+.barra{
+width:200px;
+height:20px;
+background:#1e293b;
+border-radius:10px;
+margin:auto;
+}
+
+.progreso{
+height:20px;
+background:#22c55e;
 border-radius:10px;
 }
 
@@ -91,9 +109,9 @@ border-radius:10px;
 <h2>⏳ Tiempo restante</h2>
 <h2 id="timer"></h2>
 
-<button onclick="verTablero()">Tablero</button>
-<button onclick="verTareas()">Tareas</button>
-<button onclick="verAdmin()">Admin</button>
+<button onclick="verTablero()">🎮 Tablero</button>
+<button onclick="verTareas()">📚 Tareas</button>
+<button onclick="verAdmin()">⚙️ Admin</button>
 
 <div id="contenido"></div>
 
@@ -102,6 +120,8 @@ border-radius:10px;
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 
 let jugador=""
+
+let copas=JSON.parse(localStorage.getItem("copas")) || {Renzo:0,Anita:0}
 
 const tareas=[
 
@@ -141,7 +161,32 @@ if(j.nombre=="Anita") anita=j.puntos
 
 })
 
-let html="<div class='tablero'>"
+let html=`
+
+<h3>🏆 Copas</h3>
+
+Renzo 🏆 ${copas.Renzo} |
+Anita 🏆 ${copas.Anita}
+
+<br><br>
+
+Renzo
+
+<div class="barra">
+<div class="progreso" style="width:${renzo*14}%"></div>
+</div>
+
+<br>
+
+Anita
+
+<div class="barra">
+<div class="progreso" style="width:${anita*14}%"></div>
+</div>
+
+`
+
+html+="<div class='tablero'>"
 
 for(let i=0;i<7;i++){
 
@@ -323,23 +368,27 @@ h+"h "+m+"m "+s+"s"
 
 function ganador(n){
 
+copas[n]++
+
+localStorage.setItem("copas",JSON.stringify(copas))
+
 document.getElementById("contenido").innerHTML=
 
 `
 
 <h1>🏆 ${n} GANÓ</h1>
 
-<h2>Premio sugerido ❤️</h2>
+<h2>Premio romántico ❤️</h2>
 
 <p>
 
-El perdedor debe:
+💋 10 besos
 
-💋 Dar 10 besos
+🍝 Cena preparada
 
-🍝 Invitar una comida
+💆 Masaje relajante
 
-💆 Dar masaje
+🎬 Elegir película
 
 </p>
 
