@@ -13,9 +13,23 @@ background:#f4f4f4;
 }
 
 button{
-padding:12px;
-margin:6px;
-font-size:16px;
+padding:10px;
+margin:5px;
+font-size:14px;
+border:none;
+cursor:pointer;
+}
+
+.renzoColor{
+background:#4da6ff;
+}
+
+.anitaColor{
+background:#ffd633;
+}
+
+.bothColor{
+background:#66cc66;
 }
 
 .board{
@@ -52,49 +66,55 @@ background:white;
 
 <h3 id="player"></h3>
 
-<h2>Tiempo restante</h2>
-<div id="timer"></div>
-
 <h2>Tareas</h2>
 
-<button onclick="task('Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
-<button onclick="task('Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
-<button onclick="task('Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
-
-<button onclick="task('Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
-<button onclick="task('Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
-<button onclick="task('Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
-<button onclick="task('Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
+<button id="t0" onclick="task(0)">Curso 1 qx: Resumen base</button>
+<button id="t1" onclick="task(1)">Curso 1 qx: Eva</button>
+<button id="t2" onclick="task(2)">Curso 1 qx: Estudia conmigo</button>
+<button id="t3" onclick="task(3)">Curso 2 Usa: Org mental</button>
+<button id="t4" onclick="task(4)">Curso 2 Usa: Resumen base</button>
+<button id="t5" onclick="task(5)">Curso 2 Usa: Banqueo</button>
+<button id="t6" onclick="task(6)">Curso 2 Usa: Casos esenciales</button>
 
 <h2>Tablero</h2>
 
 <div class="board">
 
-<div class="cell">Inicio</div>
-<div class="cell">1</div>
-<div class="cell">2</div>
-<div class="cell">3</div>
-<div class="cell">4</div>
-<div class="cell">5</div>
-<div class="cell">6</div>
-<div class="cell">7</div>
-<div class="cell">🏁 Meta</div>
+<div class="cell" id="c0">Inicio</div>
+<div class="cell" id="c1">1</div>
+<div class="cell" id="c2">2</div>
+<div class="cell" id="c3">3</div>
+<div class="cell" id="c4">4</div>
+<div class="cell" id="c5">5</div>
+<div class="cell" id="c6">6</div>
+<div class="cell" id="c7">7</div>
+<div class="cell" id="c8">🏁</div>
 
 </div>
 
 <h2>Puntaje</h2>
 
 Renzo: <span id="renzo">0</span>
-
 <br><br>
-
 Anita: <span id="anita">0</span>
+
+<h2 id="leader"></h2>
 
 <script>
 
 let player=""
 
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
+
+const tareas=[
+"Curso 1 qx: Resumen base",
+"Curso 1 qx: Eva",
+"Curso 1 qx: Estudia conmigo",
+"Curso 2 Usa: Org mental",
+"Curso 2 Usa: Resumen base",
+"Curso 2 Usa: Banqueo",
+"Curso 2 Usa: Casos esenciales"
+]
 
 function setPlayer(p){
 
@@ -104,7 +124,7 @@ loadScore()
 
 }
 
-function task(t){
+function task(i){
 
 if(player==""){
 alert("Selecciona jugador")
@@ -115,11 +135,11 @@ fetch(API,{
 method:"POST",
 body:JSON.stringify({
 jugador:player,
-tarea:t
+tarea:tareas[i]
 })
 })
 
-loadScore()
+setTimeout(loadScore,800)
 
 }
 
@@ -129,43 +149,99 @@ fetch(API)
 .then(r=>r.json())
 .then(data=>{
 
-let r=0
-let a=0
+let estado={}
+let renzoScore=0
+let anitaScore=0
 
 for(let i=1;i<data.length;i++){
 
-if(data[i][0]=="Renzo") r++
-if(data[i][0]=="Anita") a++
+let j=data[i][0]
+let t=data[i][1]
+
+if(!estado[t]){
+estado[t]={Renzo:false,Anita:false}
+}
+
+if(!estado[t][j]){
+
+estado[t][j]=true
+
+if(j=="Renzo") renzoScore++
+if(j=="Anita") anitaScore++
 
 }
 
-document.getElementById("renzo").innerText=r
-document.getElementById("anita").innerText=a
+}
+
+document.getElementById("renzo").innerText=renzoScore
+document.getElementById("anita").innerText=anitaScore
+
+updateTasks(estado)
+
+drawPieces(renzoScore,anitaScore)
+
+if(renzoScore>anitaScore){
+document.getElementById("leader").innerText="🏆 Renzo va ganando"
+}
+else if(anitaScore>renzoScore){
+document.getElementById("leader").innerText="🏆 Anita va ganando"
+}
+else{
+document.getElementById("leader").innerText="Empate"
+}
 
 })
 
 }
 
-setInterval(loadScore,3000)
+function updateTasks(est){
 
-const deadline=new Date("2026-03-15")
+for(let i=0;i<tareas.length;i++){
 
-function updateTimer(){
+let btn=document.getElementById("t"+i)
+btn.className=""
 
-const now=new Date()
+let e=est[tareas[i]]
 
-const diff=deadline-now
+if(!e) continue
 
-const d=Math.floor(diff/1000/60/60/24)
-const h=Math.floor(diff/1000/60/60)%24
-const m=Math.floor(diff/1000/60)%60
+if(e.Renzo && e.Anita){
 
-document.getElementById("timer").innerText=
-d+" días "+h+" horas "+m+" min"
+btn.innerText=tareas[i]+" RA"
+btn.classList.add("bothColor")
 
 }
 
-setInterval(updateTimer,1000)
+else if(e.Renzo){
+
+btn.innerText=tareas[i]+" R"
+btn.classList.add("renzoColor")
+
+}
+
+else if(e.Anita){
+
+btn.innerText=tareas[i]+" A"
+btn.classList.add("anitaColor")
+
+}
+
+}
+
+}
+
+function drawPieces(r,a){
+
+for(let i=0;i<=8;i++){
+document.getElementById("c"+i).innerHTML=i==0?"Inicio":i
+}
+
+document.getElementById("c"+r).innerHTML+=" R"
+document.getElementById("c"+a).innerHTML+=" A"
+
+}
+
+setInterval(loadScore,3000)
 
 </script>
 
