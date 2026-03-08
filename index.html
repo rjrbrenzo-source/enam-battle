@@ -14,11 +14,25 @@ text-align:center;
 background:#f4f4f4;
 }
 
+h1{
+font-size:40px;
+}
+
+h2{
+margin-top:25px;
+}
+
 button{
-padding:10px;
-margin:5px;
-width:260px;
+padding:12px;
+margin:6px;
+width:270px;
 cursor:pointer;
+font-size:14px;
+}
+
+.completed{
+background:#4CAF50;
+color:white;
 }
 
 .board{
@@ -42,12 +56,6 @@ background:white;
 font-size:14px;
 }
 
-.admin{
-margin-top:30px;
-border-top:2px solid black;
-padding-top:20px;
-}
-
 </style>
 
 </head>
@@ -55,6 +63,10 @@ padding-top:20px;
 <body>
 
 <h1>ENAM Battle</h1>
+
+<h2 style="font-size:28px;color:#333;">
+Curso 1: Ginecología | Curso 2: Neurología
+</h2>
 
 <h2>Jugador</h2>
 
@@ -68,14 +80,14 @@ padding-top:20px;
 
 <h2>Tareas</h2>
 
-<button onclick="task('Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
-<button onclick="task('Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
-<button onclick="task('Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
+<button onclick="task(this,'Curso1-1')">Curso 1: Resumen base</button>
+<button onclick="task(this,'Curso1-2')">Curso 1: EVA</button>
+<button onclick="task(this,'Curso1-3')">Curso 1: Estudia conmigo</button>
 
-<button onclick="task('Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
-<button onclick="task('Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
-<button onclick="task('Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
-<button onclick="task('Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
+<button onclick="task(this,'Curso2-1')">Curso 2: Org mental</button>
+<button onclick="task(this,'Curso2-2')">Curso 2: Resumen base</button>
+<button onclick="task(this,'Curso2-3')">Curso 2: Banqueo</button>
+<button onclick="task(this,'Curso2-4')">Curso 2: Casos esenciales</button>
 
 <h2>Tablero</h2>
 
@@ -113,45 +125,39 @@ Renzo 🏆 <span id="cupRenzo">0</span>
 
 Anita 🏆 <span id="cupAnita">0</span>
 
-<div class="admin">
+<br><br>
 
-<h2>ADMIN</h2>
-
-<p>Deadline</p>
+<h3>Deadline</h3>
 
 <input type="date" id="deadlineInput">
 
 <br><br>
 
-<button onclick="restartGame()">Reiniciar semana</button>
-
-</div>
+<button onclick="restartGame()">Reiniciar todo</button>
 
 <script>
 
 let player=""
 
-const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
-
 let deadline=localStorage.getItem("deadline") || "2026-03-15"
 
-let cupRenzo=parseInt(localStorage.getItem("cupRenzo") || 0)
-let cupAnita=parseInt(localStorage.getItem("cupAnita") || 0)
+let rScore=0
+let aScore=0
+
+let cupRenzo=0
+let cupAnita=0
 
 let winnerDeclared=false
-
-document.getElementById("cupRenzo").innerText=cupRenzo
-document.getElementById("cupAnita").innerText=cupAnita
 
 function setPlayer(p){
 
 player=p
+
 document.getElementById("player").innerText="Jugador: "+p
-loadScore()
 
 }
 
-function task(t){
+function task(btn,id){
 
 if(player===""){
 
@@ -160,45 +166,31 @@ return
 
 }
 
-fetch(API,{
-method:"POST",
-body:JSON.stringify({
-jugador:player,
-tarea:t
-})
-})
+if(btn.classList.contains("completed")) return
 
-setTimeout(loadScore,1000)
+btn.classList.add("completed")
+btn.innerHTML="✔ "+btn.innerText
+btn.disabled=true
 
-}
+if(player==="Renzo") rScore++
+if(player==="Anita") aScore++
 
-function loadScore(){
-
-fetch(API)
-.then(r=>r.json())
-.then(data=>{
-
-let r=0
-let a=0
-
-for(let i=1;i<data.length;i++){
-
-if(data[i][0]==="Renzo") r++
-if(data[i][0]==="Anita") a++
+updateScore()
 
 }
 
-document.getElementById("renzo").innerText=r
-document.getElementById("anita").innerText=a
+function updateScore(){
 
-drawBoard(r,a)
-checkWinner(r,a)
+document.getElementById("renzo").innerText=rScore
+document.getElementById("anita").innerText=aScore
 
-})
+drawBoard()
+
+checkWinner()
 
 }
 
-function drawBoard(r,a){
+function drawBoard(){
 
 for(let i=1;i<=7;i++){
 
@@ -207,34 +199,32 @@ document.getElementById("a"+i).innerText=""
 
 }
 
-if(r>0 && r<=7) document.getElementById("r"+r).innerText="🔵"
-if(a>0 && a<=7) document.getElementById("a"+a).innerText="🔴"
+if(rScore>0 && rScore<=7) document.getElementById("r"+rScore).innerText="🔵"
+if(aScore>0 && aScore<=7) document.getElementById("a"+aScore).innerText="🔴"
 
 }
 
-function checkWinner(r,a){
+function checkWinner(){
 
 if(winnerDeclared) return
 
-if(r>=7){
+if(rScore>=7){
 
 winnerDeclared=true
-document.getElementById("winner").innerText="🏆 Ganador Renzo"
+cupRenzo=1
 
-cupRenzo++
-localStorage.setItem("cupRenzo",cupRenzo)
+document.getElementById("winner").innerText="🏆 Renzo gana la semana"
 
 document.getElementById("cupRenzo").innerText=cupRenzo
 
 }
 
-if(a>=7){
+if(aScore>=7){
 
 winnerDeclared=true
-document.getElementById("winner").innerText="🏆 Ganadora Anita"
+cupAnita=1
 
-cupAnita++
-localStorage.setItem("cupAnita",cupAnita)
+document.getElementById("winner").innerText="🏆 Anita gana la semana"
 
 document.getElementById("cupAnita").innerText=cupAnita
 
@@ -251,8 +241,7 @@ const diff=end-now
 
 if(diff<=0){
 
-document.getElementById("timer").innerText="⛔ Semana terminada"
-decideWinner()
+document.getElementById("timer").innerText="⛔ Deadline terminado"
 return
 
 }
@@ -266,58 +255,27 @@ days+" días "+hours+" horas "+minutes+" min"
 
 }
 
-function decideWinner(){
-
-if(winnerDeclared) return
-
-let r=parseInt(document.getElementById("renzo").innerText)
-let a=parseInt(document.getElementById("anita").innerText)
-
-winnerDeclared=true
-
-if(r>a){
-
-document.getElementById("winner").innerText="🏆 Renzo gana por puntos"
-
-cupRenzo++
-localStorage.setItem("cupRenzo",cupRenzo)
-
-}
-
-else if(a>r){
-
-document.getElementById("winner").innerText="🏆 Anita gana por puntos"
-
-cupAnita++
-localStorage.setItem("cupAnita",cupAnita)
-
-}
-
-else{
-
-document.getElementById("winner").innerText="🤝 Empate"
-
-}
-
-document.getElementById("cupRenzo").innerText=cupRenzo
-document.getElementById("cupAnita").innerText=cupAnita
-
-}
-
 function restartGame(){
+
+rScore=0
+aScore=0
+
+cupRenzo=0
+cupAnita=0
+
+winnerDeclared=false
 
 const d=document.getElementById("deadlineInput").value
 
-if(d) localStorage.setItem("deadline",d)
+if(d) deadline=d
 
-winnerDeclared=false
+localStorage.setItem("deadline",deadline)
 
 location.reload()
 
 }
 
 setInterval(updateTimer,1000)
-setInterval(loadScore,4000)
 
 </script>
 
