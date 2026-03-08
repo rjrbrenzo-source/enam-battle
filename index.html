@@ -38,16 +38,6 @@ background:white;
 position:relative;
 }
 
-.renzo{
-color:blue;
-font-weight:bold;
-}
-
-.anita{
-color:red;
-font-weight:bold;
-}
-
 </style>
 
 </head>
@@ -63,19 +53,16 @@ font-weight:bold;
 
 <h3 id="player"></h3>
 
-<h2>Tiempo restante</h2>
-<div id="timer"></div>
-
 <h2>Tareas</h2>
 
-<button onclick="task(1,'Curso 1 qx: Resumen base')">Resumen base</button>
-<button onclick="task(2,'Curso 1 qx: Eva')">Eva</button>
-<button onclick="task(3,'Curso 1 qx: Estudia conmigo')">Estudia conmigo</button>
+<button id="t1" onclick="task(1,'Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
+<button id="t2" onclick="task(2,'Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
+<button id="t3" onclick="task(3,'Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
 
-<button onclick="task(4,'Curso 2 Usa: Org mental')">Org mental</button>
-<button onclick="task(5,'Curso 2 Usa: Resumen base')">Resumen base</button>
-<button onclick="task(6,'Curso 2 Usa: Banqueo')">Banqueo</button>
-<button onclick="task(7,'Curso 2 Usa: Casos esenciales')">Casos esenciales</button>
+<button id="t4" onclick="task(4,'Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
+<button id="t5" onclick="task(5,'Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
+<button id="t6" onclick="task(6,'Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
+<button id="t7" onclick="task(7,'Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
 
 <h2>Tablero</h2>
 
@@ -96,9 +83,7 @@ font-weight:bold;
 <h2>Puntaje</h2>
 
 Renzo: <span id="renzo">0</span>
-
 <br><br>
-
 Anita: <span id="anita">0</span>
 
 <h2 id="leader"></h2>
@@ -109,15 +94,20 @@ let player=""
 
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 
-let tasksDone={}
+const tareas=[
+"Curso 1 qx: Resumen base",
+"Curso 1 qx: Eva",
+"Curso 1 qx: Estudia conmigo",
+"Curso 2 Usa: Org mental",
+"Curso 2 Usa: Resumen base",
+"Curso 2 Usa: Banqueo",
+"Curso 2 Usa: Casos esenciales"
+]
 
 function setPlayer(p){
-
 player=p
 document.getElementById("player").innerText="Jugador: "+p
-
 loadScore()
-
 }
 
 function task(id,t){
@@ -127,13 +117,6 @@ alert("Selecciona jugador")
 return
 }
 
-if(tasksDone[id]){
-alert("Esta tarea ya fue hecha")
-return
-}
-
-tasksDone[id]=true
-
 fetch(API,{
 method:"POST",
 body:JSON.stringify({
@@ -142,7 +125,7 @@ tarea:t
 })
 })
 
-loadScore()
+setTimeout(loadScore,1000)
 
 }
 
@@ -155,10 +138,17 @@ fetch(API)
 let r=0
 let a=0
 
+let tareasEstado={}
+
 for(let i=1;i<data.length;i++){
 
-if(data[i][0]=="Renzo") r++
-if(data[i][0]=="Anita") a++
+let jugador=data[i][0]
+let tarea=data[i][1]
+
+if(jugador=="Renzo") r++
+if(jugador=="Anita") a++
+
+tareasEstado[tarea]=jugador
 
 }
 
@@ -166,6 +156,7 @@ document.getElementById("renzo").innerText=r
 document.getElementById("anita").innerText=a
 
 drawPieces(r,a)
+updateTasks(tareasEstado)
 
 if(r>a){
 document.getElementById("leader").innerText="🏆 Renzo va ganando"
@@ -181,36 +172,36 @@ document.getElementById("leader").innerText="Empate"
 
 }
 
+function updateTasks(est){
+
+for(let i=0;i<tareas.length;i++){
+
+let btn=document.getElementById("t"+(i+1))
+
+if(est[tareas[i]]=="Renzo"){
+btn.innerText=tareas[i]+" R"
+}
+
+if(est[tareas[i]]=="Anita"){
+btn.innerText=tareas[i]+" A"
+}
+
+}
+
+}
+
 function drawPieces(r,a){
 
 for(let i=0;i<=8;i++){
 document.getElementById("c"+i).innerHTML=i==0?"Inicio":i
 }
 
-document.getElementById("c"+r).innerHTML+="<div class='renzo'>R</div>"
-document.getElementById("c"+a).innerHTML+="<div class='anita'>A</div>"
+document.getElementById("c"+r).innerHTML+=" R"
+document.getElementById("c"+a).innerHTML+=" A"
 
 }
 
 setInterval(loadScore,3000)
-
-const deadline=new Date("2026-03-15")
-
-function updateTimer(){
-
-const now=new Date()
-const diff=deadline-now
-
-const d=Math.floor(diff/1000/60/60/24)
-const h=Math.floor(diff/1000/60/60)%24
-const m=Math.floor(diff/1000/60)%60
-
-document.getElementById("timer").innerText=
-d+" días "+h+" horas "+m+" min"
-
-}
-
-setInterval(updateTimer,1000)
 
 </script>
 
