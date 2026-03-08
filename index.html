@@ -1,22 +1,19 @@
 <!DOCTYPE html>
 <html>
 <head>
-<meta charset="UTF-8">
-<title>ENAM GAME LEGEND</title>
 
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<title>ENAM Game</title>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
 
 <style>
 
 body{
 font-family:Arial;
-background:#020617;
+background:#0f172a;
 color:white;
 text-align:center;
-}
-
-h1{
-color:#38bdf8;
 }
 
 button{
@@ -26,22 +23,22 @@ border-radius:10px;
 border:none;
 background:#38bdf8;
 color:white;
-font-size:15px;
+font-size:16px;
 }
 
-#tablero{
+.tablero{
 display:grid;
-grid-template-columns:repeat(5,70px);
-gap:8px;
+grid-template-columns:repeat(7,50px);
+gap:6px;
 justify-content:center;
 margin-top:20px;
 }
 
 .casilla{
-width:70px;
-height:70px;
+width:50px;
+height:50px;
 background:#1e293b;
-border-radius:14px;
+border-radius:10px;
 position:relative;
 }
 
@@ -50,34 +47,30 @@ background:#22c55e;
 }
 
 .renzo{
-width:22px;
-height:22px;
+width:20px;
+height:20px;
 background:#22c55e;
 border-radius:50%;
 position:absolute;
-top:24px;
-left:8px;
+top:15px;
+left:6px;
 }
 
 .anita{
-width:22px;
-height:22px;
+width:20px;
+height:20px;
 background:#f43f5e;
 border-radius:50%;
 position:absolute;
-top:24px;
-right:8px;
+top:15px;
+right:6px;
 }
 
 .tarea{
 background:#1e293b;
+margin:8px;
 padding:10px;
-margin:10px;
 border-radius:10px;
-}
-
-.completada{
-opacity:0.4;
 }
 
 </style>
@@ -88,15 +81,19 @@ opacity:0.4;
 
 <h1>🎮 ENAM GAME</h1>
 
-<h3 id="jugador"></h3>
+<h3>Selecciona jugador</h3>
+
+<button onclick="setJugador('Renzo')">Jugador Renzo</button>
+<button onclick="setJugador('Anita')">Jugador Anita</button>
+
+<h2 id="jugador"></h2>
 
 <h2>⏳ Tiempo restante</h2>
 <h2 id="timer"></h2>
 
-<button onclick="pantallaTablero()">🎮 Tablero</button>
-<button onclick="pantallaTareas()">📚 Tareas</button>
-<button onclick="pantallaRanking()">🏆 Ranking</button>
-<button onclick="pantallaAdmin()">⚙️ Admin</button>
+<button onclick="verTablero()">Tablero</button>
+<button onclick="verTareas()">Tareas</button>
+<button onclick="verAdmin()">Admin</button>
 
 <div id="contenido"></div>
 
@@ -104,14 +101,7 @@ opacity:0.4;
 
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 
-let jugador=localStorage.getItem("jugador")
-
-if(!jugador){
-jugador=prompt("Escribe tu nombre: Renzo o Anita")
-localStorage.setItem("jugador",jugador)
-}
-
-document.getElementById("jugador").innerText="Jugador: "+jugador
+let jugador=""
 
 const tareas=[
 
@@ -125,10 +115,20 @@ const tareas=[
 
 ]
 
-function pantallaTablero(){
+function setJugador(n){
+
+jugador=n
+
+document.getElementById("jugador").innerText="Jugador: "+jugador
+
+}
+
+function verTablero(){
 
 fetch(API+"?accion=ranking")
+
 .then(r=>r.json())
+
 .then(data=>{
 
 let renzo=0
@@ -141,13 +141,13 @@ if(j.nombre=="Anita") anita=j.puntos
 
 })
 
-let html="<div id='tablero'>"
+let html="<div class='tablero'>"
 
-for(let i=0;i<15;i++){
+for(let i=0;i<7;i++){
 
 let clase="casilla"
 
-if(i==14) clase="casilla meta"
+if(i==6) clase="casilla meta"
 
 html+=`<div class="${clase}">`
 
@@ -162,27 +162,40 @@ html+="</div>"
 
 document.getElementById("contenido").innerHTML=html
 
-if(renzo>=7 || anita>=7){
+if(renzo>=7) ganador("Renzo")
 
-ganador(renzo>anita?"Renzo":"Anita")
-
-}
+if(anita>=7) ganador("Anita")
 
 })
 
 }
 
-function pantallaTareas(){
+function verTareas(){
+
+fetch(API+"?accion=estado")
+
+.then(r=>r.json())
+
+.then(data=>{
 
 let html=""
 
 tareas.forEach(t=>{
+
+let r=data.Renzo?.includes(t)
+let a=data.Anita?.includes(t)
 
 html+=`
 
 <div class="tarea">
 
 ${t}
+
+<br>
+
+Renzo: ${r?"✅":"⬜"}
+
+Anita: ${a?"✅":"⬜"}
 
 <br>
 
@@ -200,49 +213,33 @@ Completar
 
 document.getElementById("contenido").innerHTML=html
 
+})
+
 }
 
 function completar(t){
 
+if(!jugador){
+
+alert("Selecciona jugador")
+
+return
+
+}
+
 fetch(API+"?accion=tarea&jugador="+jugador+"&tarea="+t)
 
-alert("✅ Tarea completada")
+alert("Tarea marcada")
 
-pantallaTablero()
-
-}
-
-function pantallaRanking(){
-
-fetch(API+"?accion=ranking")
-.then(r=>r.json())
-.then(data=>{
-
-let html="<h2>🏆 Ranking</h2>"
-
-data.sort((a,b)=>b.puntos-a.puntos)
-
-data.forEach(j=>{
-
-html+=`<p>${j.nombre} — ${j.puntos} puntos</p>`
-
-})
-
-document.getElementById("contenido").innerHTML=html
-
-})
+verTareas()
 
 }
 
-function pantallaAdmin(){
+function verAdmin(){
 
 let html=`
 
-<h2>ADMIN</h2>
-
-Deadline:
-
-<br>
+<h2>Administrador</h2>
 
 <input id="deadline" type="datetime-local">
 
@@ -250,7 +247,7 @@ Deadline:
 
 <button onclick="guardarDeadline()">
 
-Guardar deadline
+Guardar Deadline
 
 </button>
 
@@ -258,7 +255,7 @@ Guardar deadline
 
 <button onclick="reset()">
 
-Reiniciar juego
+Reiniciar Juego
 
 </button>
 
@@ -274,7 +271,7 @@ let d=document.getElementById("deadline").value
 
 fetch(API+"?accion=deadline&valor="+d)
 
-alert("⏳ Deadline actualizado")
+alert("Deadline actualizado")
 
 }
 
@@ -282,7 +279,7 @@ function reset(){
 
 fetch(API+"?accion=reset")
 
-alert("🔄 Juego reiniciado")
+alert("Juego reiniciado")
 
 }
 
@@ -304,7 +301,7 @@ let diff=deadline-now
 
 if(diff<0){
 
-document.getElementById("timer").innerText="FIN DEL JUEGO"
+document.getElementById("timer").innerText="FIN"
 
 return
 
@@ -314,7 +311,9 @@ let h=Math.floor(diff/3600000)
 let m=Math.floor(diff/60000)%60
 let s=Math.floor(diff/1000)%60
 
-document.getElementById("timer").innerText=h+"h "+m+"m "+s+"s"
+document.getElementById("timer").innerText=
+
+h+"h "+m+"m "+s+"s"
 
 },1000)
 
@@ -322,17 +321,25 @@ document.getElementById("timer").innerText=h+"h "+m+"m "+s+"s"
 
 }
 
-function ganador(nombre){
+function ganador(n){
 
 document.getElementById("contenido").innerHTML=
 
-`<h1>🏆 GANADOR</h1>
+`
 
-<h2>${nombre}</h2>
+<h1>🏆 ${n} GANÓ</h1>
+
+<h2>Premio sugerido ❤️</h2>
 
 <p>
 
-El perdedor debe dar un premio romántico ❤️
+El perdedor debe:
+
+💋 Dar 10 besos
+
+🍝 Invitar una comida
+
+💆 Dar masaje
 
 </p>
 
@@ -340,12 +347,9 @@ El perdedor debe dar un premio romántico ❤️
 
 }
 
-pantallaTablero()
-
 iniciarTimer()
 
 </script>
 
 </body>
-
 </html>
