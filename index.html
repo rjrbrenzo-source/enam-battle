@@ -1,1 +1,173 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>ENAM Battle</title>
 
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#f4f4f4;
+}
+
+button{
+padding:12px;
+margin:6px;
+font-size:16px;
+}
+
+.board{
+display:flex;
+flex-wrap:wrap;
+max-width:420px;
+margin:auto;
+}
+
+.cell{
+width:90px;
+height:70px;
+border:2px solid black;
+margin:5px;
+display:flex;
+align-items:center;
+justify-content:center;
+font-size:12px;
+background:white;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>ENAM Battle</h1>
+
+<h2>Jugador</h2>
+
+<button onclick="setPlayer('Renzo')">Soy Renzo</button>
+<button onclick="setPlayer('Anita')">Soy Anita</button>
+
+<h3 id="player"></h3>
+
+<h2>Tiempo restante</h2>
+<div id="timer"></div>
+
+<h2>Tareas</h2>
+
+<button onclick="task('Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
+<button onclick="task('Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
+<button onclick="task('Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
+
+<button onclick="task('Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
+<button onclick="task('Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
+<button onclick="task('Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
+<button onclick="task('Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
+
+<h2>Tablero</h2>
+
+<div class="board">
+
+<div class="cell">Inicio</div>
+<div class="cell">1</div>
+<div class="cell">2</div>
+<div class="cell">3</div>
+<div class="cell">4</div>
+<div class="cell">5</div>
+<div class="cell">6</div>
+<div class="cell">7</div>
+<div class="cell">🏁 Meta</div>
+
+</div>
+
+<h2>Puntaje</h2>
+
+Renzo: <span id="renzo">0</span>
+
+<br><br>
+
+Anita: <span id="anita">0</span>
+
+<script>
+
+let player=""
+
+const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
+
+function setPlayer(p){
+
+player=p
+document.getElementById("player").innerText="Jugador: "+p
+loadScore()
+
+}
+
+function task(t){
+
+if(player==""){
+alert("Selecciona jugador")
+return
+}
+
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+jugador:player,
+tarea:t
+})
+})
+
+loadScore()
+
+}
+
+function loadScore(){
+
+fetch(API)
+.then(r=>r.json())
+.then(data=>{
+
+let r=0
+let a=0
+
+for(let i=1;i<data.length;i++){
+
+if(data[i][0]=="Renzo") r++
+if(data[i][0]=="Anita") a++
+
+}
+
+document.getElementById("renzo").innerText=r
+document.getElementById("anita").innerText=a
+
+})
+
+}
+
+setInterval(loadScore,3000)
+
+const deadline=new Date("2026-03-15")
+
+function updateTimer(){
+
+const now=new Date()
+
+const diff=deadline-now
+
+const d=Math.floor(diff/1000/60/60/24)
+const h=Math.floor(diff/1000/60/60)%24
+const m=Math.floor(diff/1000/60)%60
+
+document.getElementById("timer").innerText=
+d+" días "+h+" horas "+m+" min"
+
+}
+
+setInterval(updateTimer,1000)
+
+</script>
+
+</body>
+</html>
