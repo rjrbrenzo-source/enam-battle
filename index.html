@@ -5,8 +5,8 @@
 <title>ENAM Battle</title>
 
 <!-- Iconos para app -->
-<link rel="icon" type="image/png" sizes="512x512" href="icon.png">
-<link rel="apple-touch-icon" sizes="180x180" href="icon.png">
+<link rel="icon" type="image/png" sizes="512x512" href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Stethoscope_icon.svg/512px-Stethoscope_icon.svg.png">
+<link rel="apple-touch-icon" sizes="180x180" href="https://upload.wikimedia.org/wikipedia/commons/thumb/5/5e/Stethoscope_icon.svg/512px-Stethoscope_icon.svg.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
@@ -14,23 +14,25 @@
 body{
   font-family: Arial;
   text-align: center;
-  background: #f4f4f4;
-  font-size: 22px; /* texto general grande */
+  background: url('https://images.unsplash.com/photo-1588776814546-0a8e3de2cb72?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=MnwxMTc3M3wwfDF8c2VhfHxkZWNpYmluZyBtZWRpY2luZXxlbnwwfHx8fDE2OTk1NjY1Mzc&ixlib=rb-4.0.3&q=80&w=1080') no-repeat center center fixed;
+  background-size: cover;
+  font-size: 22px;
   margin:0;
   padding:0;
+  color: #000;
 }
 .info{
-  background: white;
+  background: rgba(255,255,255,0.9);
   padding: 24px;
   border: 3px solid black;
   margin: 20px;
   font-weight: bold;
-  font-size: 26px; /* info grande */
+  font-size: 26px;
 }
 button{
   padding: 20px 30px;
   margin: 12px;
-  font-size: 24px; /* botones gigantes */
+  font-size: 24px;
   border: none;
   cursor: pointer;
   border-radius: 12px;
@@ -57,12 +59,12 @@ button:disabled{
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 20px; /* casillas grandes */
-  background: white;
+  font-size: 20px;
+  background: rgba(255,255,255,0.9);
   font-weight:bold;
 }
 .winnerBox{
-  background: white;
+  background: rgba(255,255,255,0.95);
   border: 4px solid black;
   padding: 30px;
   margin: 30px;
@@ -121,11 +123,15 @@ Anita: <span id="anita">0</span>
 <h2 id="leader"></h2>
 <div id="winner"></div>
 
+<!-- Sonidos online -->
+<audio id="clickSound" src="https://www.soundjay.com/button/sounds/button-16.mp3"></audio>
+<audio id="winSound" src="https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3"></audio>
+
 <script>
+// Mismo código de juego que antes
 let player=""
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 const DEADLINE=new Date("2026-03-15T23:00:00")
-
 const tareas=[
 "Curso 1 Ginecología: Resumen base",
 "Curso 1 Ginecología: Eva",
@@ -135,7 +141,6 @@ const tareas=[
 "Curso 2 Neurología: Banqueo",
 "Curso 2 Neurología: Casos esenciales"
 ]
-
 const premios=[
 "Cena romántica 🍝","Masaje de 30 min 💆","Película elegida 🎬","Desayuno en cama ☕","Salida sorpresa 🌅",
 "Vale por 3 favores 💋","Paseo por la ciudad 🚶‍♀️🚶‍♂️","Helado juntos 🍨","Baño de burbujas 🛁","Juego de mesa juntos 🎲",
@@ -150,110 +155,19 @@ const premios=[
 "Tomar té juntos 🍵","Jugar videojuego juntos 🎮","Foto divertida juntos 🤳"
 ]
 
-function setPlayer(p){
-player=p
-document.getElementById("player").innerText="Jugador: "+p
-loadScore()
-}
-
+function playSound(id){ document.getElementById(id).play() }
+function setPlayer(p){ player=p; document.getElementById("player").innerText="Jugador: "+p; loadScore() }
 function gameEnded(){ return new Date()>DEADLINE }
-
-function task(i){
-if(gameEnded()){ alert("El juego terminó"); return }
-if(player==""){ alert("Selecciona jugador"); return }
-fetch(API,{method:"POST", body:JSON.stringify({jugador:player,tarea:tareas[i]})})
-setTimeout(loadScore,800)
-}
-
+function task(i){ if(gameEnded()){ alert("El juego terminó"); return } if(player==""){ alert("Selecciona jugador"); return } playSound('clickSound'); fetch(API,{method:"POST", body:JSON.stringify({jugador:player,tarea:tareas[i]})}); setTimeout(loadScore,800) }
 function disableButtons(){ for(let i=0;i<tareas.length;i++){ document.getElementById("t"+i).disabled=true } }
-
-function loadScore(){
-fetch(API).then(r=>r.json()).then(data=>{
-let estado={}, renzoScore=0, anitaScore=0
-for(let i=1;i<data.length;i++){
-let j=data[i][0], t=data[i][1]
-if(!estado[t]) estado[t]={Renzo:false,Anita:false}
-if(!estado[t][j]){
-estado[t][j]=true
-if(j=="Renzo") renzoScore++
-if(j=="Anita") anitaScore++
-}
-}
-document.getElementById("renzo").innerText=renzoScore
-document.getElementById("anita").innerText=anitaScore
-updateTasks(estado)
-drawPieces(renzoScore,anitaScore)
-checkLeader(renzoScore,anitaScore)
-checkWinner(renzoScore,anitaScore)
-})
-}
-
-function updateTasks(est){
-for(let i=0;i<tareas.length;i++){
-let btn=document.getElementById("t"+i)
-btn.className=""
-let e=est[tareas[i]]
-if(!e) continue
-if(e.Renzo && e.Anita){ btn.innerText=tareas[i]+" RA"; btn.classList.add("bothColor") }
-else if(e.Renzo){ btn.innerText=tareas[i]+" R"; btn.classList.add("renzoColor") }
-else if(e.Anita){ btn.innerText=tareas[i]+" A"; btn.classList.add("anitaColor") }
-}
-}
-
-function drawPieces(r,a){
-for(let i=0;i<=7;i++){
-if(i==0) document.getElementById("c"+i).innerHTML="Inicio"
-else if(i==7) document.getElementById("c"+i).innerHTML="META"
-else document.getElementById("c"+i).innerHTML=i
-}
-document.getElementById("c"+Math.min(r,7)).innerHTML+=" R"
-document.getElementById("c"+Math.min(a,7)).innerHTML+=" A"
-}
-
-function checkLeader(r,a){
-if(r>a) document.getElementById("leader").innerText="🏆 Renzo va ganando"
-else if(a>r) document.getElementById("leader").innerText="🏆 Anita va ganando"
-else document.getElementById("leader").innerText="Empate"
-}
-
-function premiosAleatorios(){
-let copia=Array.from(premios), seleccion=[]
-for(let i=0;i<5;i++){
-let idx=Math.floor(Math.random()*copia.length)
-seleccion.push(copia[idx])
-copia.splice(idx,1)
-}
-return seleccion.join("<br>")
-}
-
-function showPrizes(winner){
-document.getElementById("winner").innerHTML=
-`<div class="winnerBox">
-🏆 ${winner} ganó el ENAM Battle
-<h3>Premios para parejas 💑</h3>
-${premiosAleatorios()}
-</div>`
-}
-
-function checkWinner(r,a){
-if(r>=7){ disableButtons(); showPrizes("Renzo"); return }
-if(a>=7){ disableButtons(); showPrizes("Anita"); return }
-if(gameEnded()){ disableButtons()
-if(r>a){ showPrizes("Renzo") }
-else if(a>r){ showPrizes("Anita") }
-else{ document.getElementById("winner").innerHTML="<div class='winnerBox'>🤝 Empate</div>" }
-}
-}
-
-function updateTimer(){
-let now=new Date(), diff=DEADLINE-now
-if(diff<=0){ document.getElementById("timer").innerText="⏰ Competencia terminada"; return }
-let d=Math.floor(diff/1000/60/60/24)
-let h=Math.floor(diff/1000/60/60)%24
-let m=Math.floor(diff/1000/60)%60
-let s=Math.floor(diff/1000)%60
-document.getElementById("timer").innerText="⏳ Tiempo restante: "+d+"d "+h+"h "+m+"m "+s+"s"
-}
+function loadScore(){ fetch(API).then(r=>r.json()).then(data=>{let estado={}, rS=0, aS=0; for(let i=1;i<data.length;i++){let j=data[i][0], t=data[i][1]; if(!estado[t]) estado[t]={Renzo:false,Anita:false}; if(!estado[t][j]){estado[t][j]=true; if(j=="Renzo") rS++; if(j=="Anita") aS++ } } document.getElementById("renzo").innerText=rS; document.getElementById("anita").innerText=aS; updateTasks(estado); drawPieces(rS,aS); checkLeader(rS,aS); checkWinner(rS,aS)}) }
+function updateTasks(est){for(let i=0;i<tareas.length;i++){let btn=document.getElementById("t"+i); btn.className=""; let e=est[tareas[i]]; if(!e) continue; if(e.Renzo && e.Anita){ btn.innerText=tareas[i]+" RA"; btn.classList.add("bothColor") } else if(e.Renzo){ btn.innerText=tareas[i]+" R"; btn.classList.add("renzoColor") } else if(e.Anita){ btn.innerText=tareas[i]+" A"; btn.classList.add("anitaColor") }}}
+function drawPieces(r,a){for(let i=0;i<=7;i++){if(i==0) document.getElementById("c"+i).innerHTML="Inicio"; else if(i==7) document.getElementById("c"+i).innerHTML="META"; else document.getElementById("c"+i).innerHTML=i} document.getElementById("c"+Math.min(r,7)).innerHTML+=" R"; document.getElementById("c"+Math.min(a,7)).innerHTML+=" A" }
+function checkLeader(r,a){ if(r>a) document.getElementById("leader").innerText="🏆 Renzo va ganando"; else if(a>r) document.getElementById("leader").innerText="🏆 Anita va ganando"; else document.getElementById("leader").innerText="Empate" }
+function premiosAleatorios(){let copia=Array.from(premios), seleccion=[]; for(let i=0;i<5;i++){let idx=Math.floor(Math.random()*copia.length); seleccion.push(copia[idx]); copia.splice(idx,1) } return seleccion.join("<br>") }
+function showPrizes(w){ playSound('winSound'); document.getElementById("winner").innerHTML=`<div class="winnerBox">🏆 ${w} ganó el ENAM Battle<h3>Premios para parejas 💑</h3>${premiosAleatorios()}</div>` }
+function checkWinner(r,a){if(r>=7){disableButtons();showPrizes("Renzo");return} if(a>=7){disableButtons();showPrizes("Anita");return} if(gameEnded()){disableButtons(); if(r>a){showPrizes("Renzo")} else if(a>r){showPrizes("Anita")} else{document.getElementById("winner").innerHTML="<div class='winnerBox'>🤝 Empate</div>"}}}
+function updateTimer(){let now=new Date(), diff=DEADLINE-now; if(diff<=0){document.getElementById("timer").innerText="⏰ Competencia terminada"; return} let d=Math.floor(diff/1000/60/60/24); let h=Math.floor(diff/1000/60/60)%24; let m=Math.floor(diff/1000/60)%60; let s=Math.floor(diff/1000)%60; document.getElementById("timer").innerText="⏳ Tiempo restante: "+d+"d "+h+"h "+m+"m "+s+"s" }
 
 setInterval(updateTimer,1000)
 setInterval(loadScore,3000)
