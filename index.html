@@ -11,16 +11,62 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
 <style>
-body{ font-family:Arial; text-align:center; background:#f4f4f4; }
-.info{ background:white; padding:12px; border:2px solid black; margin:10px; font-weight:bold; }
-button{ padding:10px; margin:6px; font-size:14px; border:none; cursor:pointer; }
-button:disabled{ background:#cccccc; cursor:not-allowed; }
+body{
+  font-family: Arial;
+  text-align: center;
+  background: #f4f4f4;
+  font-size: 18px;
+}
+.info{
+  background: white;
+  padding: 16px;
+  border: 2px solid black;
+  margin: 12px;
+  font-weight: bold;
+  font-size: 20px;
+}
+button{
+  padding: 14px 20px;
+  margin: 8px;
+  font-size: 18px;
+  border: none;
+  cursor: pointer;
+  border-radius: 8px;
+}
+button:disabled{
+  background: #cccccc;
+  cursor: not-allowed;
+}
 .renzoColor{ background:#4da6ff; }
 .anitaColor{ background:#ffd633; }
 .bothColor{ background:#66cc66; }
-.board{ display:flex; flex-wrap:wrap; max-width:420px; margin:auto; }
-.cell{ width:90px; height:70px; border:2px solid black; margin:5px; display:flex; align-items:center; justify-content:center; font-size:13px; background:white; }
-.winnerBox{ background:white; border:3px solid black; padding:20px; margin:20px; font-size:18px; }
+.board{
+  display: flex;
+  flex-wrap: wrap;
+  max-width: 480px;
+  margin: auto;
+}
+.cell{
+  width: 110px;
+  height: 80px;
+  border: 2px solid black;
+  margin: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  background: white;
+}
+.winnerBox{
+  background: white;
+  border: 3px solid black;
+  padding: 24px;
+  margin: 20px;
+  font-size: 22px;
+}
+h1{ font-size: 32px; }
+h2{ font-size: 28px; }
+h3{ font-size: 24px; }
 </style>
 </head>
 
@@ -86,7 +132,6 @@ const tareas=[
 "Curso 2 Neurología: Casos esenciales"
 ]
 
-// Lista de 50 premios para parejas
 const premios=[
 "Cena romántica 🍝","Masaje de 30 min 💆","Película elegida 🎬","Desayuno en cama ☕","Salida sorpresa 🌅",
 "Vale por 3 favores 💋","Paseo por la ciudad 🚶‍♀️🚶‍♂️","Helado juntos 🍨","Baño de burbujas 🛁","Juego de mesa juntos 🎲",
@@ -167,7 +212,6 @@ else if(a>r) document.getElementById("leader").innerText="🏆 Anita va ganando"
 else document.getElementById("leader").innerText="Empate"
 }
 
-// Selecciona 5 premios aleatorios de 50
 function premiosAleatorios(){
 let copia=Array.from(premios), seleccion=[]
 for(let i=0;i<5;i++){
@@ -197,7 +241,6 @@ else{ document.getElementById("winner").innerHTML="<div class='winnerBox'>🤝 E
 }
 }
 
-// Cuenta regresiva
 function updateTimer(){
 let now=new Date(), diff=DEADLINE-now
 if(diff<=0){ document.getElementById("timer").innerText="⏰ Competencia terminada"; return }
