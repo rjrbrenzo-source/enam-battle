@@ -12,6 +12,14 @@ text-align:center;
 background:#f4f4f4;
 }
 
+.info{
+background:white;
+padding:10px;
+border:2px solid black;
+margin:10px;
+font-weight:bold;
+}
+
 button{
 padding:10px;
 margin:5px;
@@ -20,17 +28,14 @@ border:none;
 cursor:pointer;
 }
 
-.renzoColor{
-background:#4da6ff;
+button:disabled{
+background:#cccccc;
+cursor:not-allowed;
 }
 
-.anitaColor{
-background:#ffd633;
-}
-
-.bothColor{
-background:#66cc66;
-}
+.renzoColor{background:#4da6ff;}
+.anitaColor{background:#ffd633;}
+.bothColor{background:#66cc66;}
 
 .board{
 display:flex;
@@ -51,41 +56,26 @@ font-size:14px;
 background:white;
 }
 
-#courses{
+.winnerBox{
 background:white;
-padding:10px;
-margin:10px;
-border-radius:10px;
-font-weight:bold;
-}
-
-#timer{
-font-size:20px;
-margin:10px;
-}
-
-#winnerBox{
-font-size:22px;
-font-weight:bold;
+border:3px solid black;
+padding:20px;
 margin:20px;
-color:#cc6600;
+font-size:18px;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <h1>ENAM Battle</h1>
 
-<div id="courses">
+<div class="info">
 Curso 1: Ginecología | Curso 2: Neurología
+<br>
+Deadline: 15 Marzo 2026 – 11:00 PM
 </div>
-
-<div id="timer"></div>
-
-<div id="winnerBox"></div>
 
 <h2>Jugador</h2>
 
@@ -96,26 +86,26 @@ Curso 1: Ginecología | Curso 2: Neurología
 
 <h2>Tareas</h2>
 
-<button id="t0" onclick="task(0)">Curso 1: Resumen base</button>
-<button id="t1" onclick="task(1)">Curso 1: Eva</button>
-<button id="t2" onclick="task(2)">Curso 1: Estudia conmigo</button>
-<button id="t3" onclick="task(3)">Curso 2: Org mental</button>
-<button id="t4" onclick="task(4)">Curso 2: Resumen base</button>
-<button id="t5" onclick="task(5)">Curso 2: Banqueo</button>
-<button id="t6" onclick="task(6)">Curso 2: Casos esenciales</button>
+<button id="t0" onclick="task(0)">Resumen base</button>
+<button id="t1" onclick="task(1)">Eva</button>
+<button id="t2" onclick="task(2)">Estudia conmigo</button>
+<button id="t3" onclick="task(3)">Org mental</button>
+<button id="t4" onclick="task(4)">Resumen base</button>
+<button id="t5" onclick="task(5)">Banqueo</button>
+<button id="t6" onclick="task(6)">Casos esenciales</button>
 
 <h2>Tablero</h2>
 
 <div class="board">
 
-<div class="cell" id="c0">0</div>
+<div class="cell" id="c0">Inicio</div>
 <div class="cell" id="c1">1</div>
 <div class="cell" id="c2">2</div>
 <div class="cell" id="c3">3</div>
 <div class="cell" id="c4">4</div>
 <div class="cell" id="c5">5</div>
 <div class="cell" id="c6">6</div>
-<div class="cell" id="c7">🏁 Meta</div>
+<div class="cell" id="c7">META</div>
 
 </div>
 
@@ -125,35 +115,42 @@ Renzo: <span id="renzo">0</span>
 <br><br>
 Anita: <span id="anita">0</span>
 
+<h2 id="leader"></h2>
+
+<div id="winner"></div>
+
 <script>
 
 let player=""
 
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 
+const DEADLINE=new Date("2026-03-15T23:00:00")
+
 const tareas=[
-"Curso 1: Resumen base",
-"Curso 1: Eva",
-"Curso 1: Estudia conmigo",
-"Curso 2: Org mental",
-"Curso 2: Resumen base",
-"Curso 2: Banqueo",
-"Curso 2: Casos esenciales"
+"Curso1 Resumen",
+"Curso1 Eva",
+"Curso1 Estudia",
+"Curso2 Org",
+"Curso2 Resumen",
+"Curso2 Banqueo",
+"Curso2 Casos"
 ]
 
-const deadline=new Date("2026-03-15T23:00:00")
-
 function setPlayer(p){
-
 player=p
 document.getElementById("player").innerText="Jugador: "+p
+loadScore()
+}
 
+function gameEnded(){
+return new Date()>DEADLINE
 }
 
 function task(i){
 
-if(new Date()>deadline){
-alert("La competencia terminó")
+if(gameEnded()){
+alert("El juego terminó")
 return
 }
 
@@ -171,6 +168,14 @@ tarea:tareas[i]
 })
 
 setTimeout(loadScore,800)
+
+}
+
+function disableButtons(){
+
+for(let i=0;i<tareas.length;i++){
+document.getElementById("t"+i).disabled=true
+}
 
 }
 
@@ -208,9 +213,8 @@ document.getElementById("renzo").innerText=renzoScore
 document.getElementById("anita").innerText=anitaScore
 
 updateTasks(estado)
-
 drawPieces(renzoScore,anitaScore)
-
+checkLeader(renzoScore,anitaScore)
 checkWinner(renzoScore,anitaScore)
 
 })
@@ -229,24 +233,18 @@ let e=est[tareas[i]]
 if(!e) continue
 
 if(e.Renzo && e.Anita){
-
 btn.innerText=tareas[i]+" RA"
 btn.classList.add("bothColor")
-
 }
 
 else if(e.Renzo){
-
 btn.innerText=tareas[i]+" R"
 btn.classList.add("renzoColor")
-
 }
 
 else if(e.Anita){
-
 btn.innerText=tareas[i]+" A"
 btn.classList.add("anitaColor")
-
 }
 
 }
@@ -256,62 +254,86 @@ btn.classList.add("anitaColor")
 function drawPieces(r,a){
 
 for(let i=0;i<=7;i++){
-document.getElementById("c"+i).innerHTML=i==7?"🏁 Meta":i
+
+if(i==0) document.getElementById("c"+i).innerHTML="Inicio"
+else if(i==7) document.getElementById("c"+i).innerHTML="META"
+else document.getElementById("c"+i).innerHTML=i
+
 }
 
-if(r<=7) document.getElementById("c"+r).innerHTML+=" R"
-if(a<=7) document.getElementById("c"+a).innerHTML+=" A"
+document.getElementById("c"+Math.min(r,7)).innerHTML+=" R"
+document.getElementById("c"+Math.min(a,7)).innerHTML+=" A"
+
+}
+
+function checkLeader(r,a){
+
+if(r>a){
+document.getElementById("leader").innerText="🏆 Renzo va ganando"
+}
+else if(a>r){
+document.getElementById("leader").innerText="🏆 Anita va ganando"
+}
+else{
+document.getElementById("leader").innerText="Empate"
+}
+
+}
+
+function showPrizes(winner){
+
+document.getElementById("winner").innerHTML=
+
+`<div class="winnerBox">
+
+🏆 ${winner} ganó el ENAM Battle
+
+<h3>Premios posibles 💑</h3>
+
+• Cena romántica pagada por el perdedor 🍝  
+• Masaje de 30 minutos 💆  
+• Película elegida por el ganador 🎬  
+• Desayuno en cama ☕  
+• Salida sorpresa el fin de semana 🌅  
+
+</div>`
 
 }
 
 function checkWinner(r,a){
 
 if(r>=7){
-document.getElementById("winnerBox").innerText="🏆 Renzo llegó a META y ganó"
-}
-
-if(a>=7){
-document.getElementById("winnerBox").innerText="🏆 Anita llegó a META y ganó"
-}
-
-if(new Date()>deadline){
-
-if(r>a){
-document.getElementById("winnerBox").innerText="⏰ Tiempo terminado. Ganador: Renzo 🏆"
-}
-
-else if(a>r){
-document.getElementById("winnerBox").innerText="⏰ Tiempo terminado. Ganadora: Anita 🏆"
-}
-
-else{
-document.getElementById("winnerBox").innerText="⏰ Empate"
-}
-
-}
-
-}
-
-function updateTimer(){
-
-const now=new Date()
-
-const diff=deadline-now
-
-if(diff<=0){
-document.getElementById("timer").innerText="⏰ Competencia terminada"
+disableButtons()
+document.getElementById("winner").innerHTML="<div class='winnerBox'>🏆 Renzo llegó a META y ganó</div>"
+showPrizes("Renzo")
 return
 }
 
-const d=Math.floor(diff/1000/60/60/24)
-const h=Math.floor(diff/1000/60/60)%24
-const m=Math.floor(diff/1000/60)%60
+if(a>=7){
+disableButtons()
+document.getElementById("winner").innerHTML="<div class='winnerBox'>🏆 Anita llegó a META y ganó</div>"
+showPrizes("Anita")
+return
+}
 
-document.getElementById("timer").innerText="Deadline: "+d+"d "+h+"h "+m+"m"
+if(gameEnded()){
+
+disableButtons()
+
+if(r>a){
+showPrizes("Renzo")
+}
+else if(a>r){
+showPrizes("Anita")
+}
+else{
+document.getElementById("winner").innerHTML="<div class='winnerBox'>🤝 Empate</div>"
+}
 
 }
 
-setInterval(updateTimer,1000)
+}
+
 setInterval(loadScore,3000)
 
 </script>
