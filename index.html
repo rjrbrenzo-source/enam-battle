@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>ENAM Battle</title>
+<title>ENAM Game 🎮</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
 
@@ -12,59 +12,53 @@
 
 body{
 font-family:Arial;
+background:#0f172a;
+color:white;
 text-align:center;
-background:#eef2ff;
 }
 
 button{
 padding:10px;
 margin:6px;
+border-radius:10px;
+border:none;
+background:#38bdf8;
+color:white;
+font-size:16px;
 }
 
-#board{
+.tablero{
 display:grid;
-grid-template-columns:repeat(5,70px);
-grid-gap:8px;
+grid-template-columns:repeat(8,40px);
+gap:6px;
 justify-content:center;
 margin-top:20px;
 }
 
-.cell{
-width:70px;
-height:70px;
-border-radius:12px;
-background:white;
-border:2px solid #444;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:22px;
-transition:all 0.3s;
+.casilla{
+width:40px;
+height:40px;
+background:#1e293b;
+border-radius:8px;
 }
 
-.cell.active{
-background:#c7d2fe;
+.fichaA{
+background:#22c55e;
 }
 
-#victory{
-display:none;
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:#000000cc;
-color:white;
-font-size:28px;
-align-items:center;
-justify-content:center;
-flex-direction:column;
+.fichaB{
+background:#f43f5e;
 }
 
-.admin{
-margin-top:40px;
-border-top:2px solid #333;
-padding-top:20px;
+.tarea{
+background:#1e293b;
+padding:10px;
+margin:5px;
+border-radius:10px;
+}
+
+.bloqueada{
+opacity:0.4;
 }
 
 </style>
@@ -72,249 +66,196 @@ padding-top:20px;
 
 <body>
 
-<h1>ENAM Battle</h1>
+<h1>🎮 ENAM Game</h1>
 
-<h3 id="player"></h3>
-
-<button onclick="setPlayer('Renzo')">Soy Renzo</button>
-<button onclick="setPlayer('Anita')">Soy Anita</button>
+<h3 id="jugadorActual"></h3>
 
 <h2>⏳ Tiempo restante</h2>
-<div id="timer"></div>
+<h3 id="timer"></h3>
 
-<h2>🎮 Tablero</h2>
+<button onclick="mostrar('tablero')">Tablero</button>
+<button onclick="mostrar('tareas')">Tareas</button>
+<button onclick="mostrar('ranking')">Ranking</button>
+<button onclick="mostrar('admin')">Admin</button>
 
-<div id="board">
-
-<div class="cell">🏁</div>
-<div class="cell" id="c7"></div>
-<div class="cell" id="c6"></div>
-<div class="cell" id="c5"></div>
-<div class="cell" id="c4"></div>
-<div class="cell" id="c3"></div>
-<div class="cell" id="c2"></div>
-<div class="cell" id="c1"></div>
-<div class="cell">Inicio</div>
-
-</div>
-
-<h2>📋 Tareas</h2>
-
-<button onclick="task('Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
-<button onclick="task('Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
-<button onclick="task('Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
-
-<button onclick="task('Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
-<button onclick="task('Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
-<button onclick="task('Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
-<button onclick="task('Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
-
-<h2>📊 Ranking semanal</h2>
-
-Renzo: <span id="renzo">0</span> pts  
-<br><br>
-Anita: <span id="anita">0</span> pts  
-
-<h3 id="message"></h3>
-
-<div class="admin">
-
-<h2>👑 ADMIN</h2>
-
-<p>Deadline</p>
-
-<input type="date" id="deadlineInput">
-
-<br><br>
-
-<button onclick="setDeadline()">Guardar deadline</button>
-
-</div>
-
-<div id="victory">
-
-<div id="victoryText"></div>
-
-<button onclick="closeVictory()">Cerrar</button>
-
-</div>
-
-<audio id="sound">
-<source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">
-</audio>
+<div id="tablero"></div>
+<div id="tareas"></div>
+<div id="ranking"></div>
+<div id="admin"></div>
 
 <script>
 
-let player=""
-
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 
-let deadline=localStorage.getItem("deadline") || "2026-03-15"
+let jugador=localStorage.getItem("jugador")
 
-const messages=[
-"💪 ¡Vamos! cada tarea es un paso al 15 en el ENAM",
-"❤️ Anita y Renzo, equipo invencible",
-"🔥 El esfuerzo de hoy será el orgullo de mañana",
-"📚 Una tarea más cerca del sueño",
-"🏆 El ganador invita la cita"
+if(!jugador){
+jugador=prompt("Escribe tu nombre: Renzo o Anita")
+localStorage.setItem("jugador",jugador)
+}
+
+document.getElementById("jugadorActual").innerText="Jugador: "+jugador
+
+const tareasLista=[
+
+"Curso 1 qx: Resumen base",
+"Curso 1 qx: Eva",
+"Curso 1 qx: Estudia conmigo",
+"Curso 2 Usa: Org mental",
+"Curso 2 Usa: Resumen base",
+"Curso 2 Usa: Banqueo",
+"Curso 2 Usa: Casos esenciales"
+
 ]
 
-function setPlayer(p){
+function mostrar(p){
 
-player=p
+document.getElementById("tablero").style.display="none"
+document.getElementById("tareas").style.display="none"
+document.getElementById("ranking").style.display="none"
+document.getElementById("admin").style.display="none"
 
-document.getElementById("player").innerText="Jugador: "+p
-
-loadScore()
-
-}
-
-function task(t){
-
-if(player==""){
-
-alert("Selecciona jugador")
-
-return
+document.getElementById(p).style.display="block"
 
 }
 
-document.getElementById("sound").play()
+function cargarTablero(){
 
-fetch(API,{
-method:"POST",
-body:JSON.stringify({
-jugador:player,
-tarea:t
+let html="<div class='tablero'>"
+
+for(let i=0;i<20;i++){
+
+html+="<div class='casilla' id='c"+i+"'></div>"
+
+}
+
+html+="</div>"
+
+document.getElementById("tablero").innerHTML=html
+
+}
+
+function cargarTareas(){
+
+let html=""
+
+tareasLista.forEach(t=>{
+
+html+=`
+<div class='tarea'>
+${t}
+<br>
+<button onclick="completar('${t}')">Completar</button>
+</div>
+`
+
 })
-})
 
-setTimeout(loadScore,1000)
+document.getElementById("tareas").innerHTML=html
 
 }
 
-function loadScore(){
+function completar(t){
 
-fetch(API)
+fetch(API+"?accion=tarea&jugador="+jugador+"&tarea="+t)
+
+alert("Tarea completada!")
+
+cargarRanking()
+
+}
+
+function cargarRanking(){
+
+fetch(API+"?accion=ranking")
 .then(r=>r.json())
 .then(data=>{
 
-let r=0
-let a=0
+let html="<h2>🏆 Ranking</h2>"
 
-for(let i=1;i<data.length;i++){
+data.forEach(j=>{
 
-if(data[i][0]=="Renzo") r++
+html+=j.nombre+" : "+j.puntos+" pts<br>"
 
-if(data[i][0]=="Anita") a++
+})
 
-}
-
-document.getElementById("renzo").innerText=r
-document.getElementById("anita").innerText=a
-
-drawBoard(r,a)
-
-checkWinner(r,a)
-
-randomMessage()
+document.getElementById("ranking").innerHTML=html
 
 })
 
 }
 
-function drawBoard(r,a){
+function adminPanel(){
 
-for(let i=1;i<=7;i++){
+let html=`
 
-document.getElementById("c"+i).innerText=""
+<h2>ADMIN</h2>
 
-}
+<input id="deadline" type="datetime-local">
 
-if(r>0) document.getElementById("c"+r).innerText+="🔵"
+<br><br>
 
-if(a>0) document.getElementById("c"+a).innerText+="🔴"
+<button onclick="guardarDeadline()">Guardar Deadline</button>
 
-}
+<button onclick="reiniciar()">Reiniciar Juego</button>
 
-function checkWinner(r,a){
+`
 
-if(r>=7){
-
-showVictory("🏆 Renzo gana la semana")
+document.getElementById("admin").innerHTML=html
 
 }
 
-if(a>=7){
+function guardarDeadline(){
 
-showVictory("🏆 Anita gana la semana")
+let d=document.getElementById("deadline").value
 
-}
+fetch(API+"?accion=deadline&valor="+d)
 
-}
-
-function showVictory(text){
-
-document.getElementById("victoryText").innerText=text
-
-document.getElementById("victory").style.display="flex"
+alert("Deadline actualizado")
 
 }
 
-function closeVictory(){
+function reiniciar(){
 
-document.getElementById("victory").style.display="none"
+fetch(API+"?accion=reset")
 
-}
-
-function randomMessage(){
-
-const m=messages[Math.floor(Math.random()*messages.length)]
-
-document.getElementById("message").innerText=m
+alert("Nuevo juego iniciado")
 
 }
 
-function updateTimer(){
+function timer(){
 
-const now=new Date()
+fetch(API+"?accion=deadline")
 
-const d=new Date(deadline)
+.then(r=>r.text())
 
-const diff=d-now
+.then(d=>{
 
-if(diff<=0){
+let deadline=new Date(d)
 
-document.getElementById("timer").innerText="⛔ Semana cerrada"
+setInterval(()=>{
 
-return
+let now=new Date()
 
-}
+let diff=deadline-now
 
-const days=Math.floor(diff/1000/60/60/24)
-const hours=Math.floor(diff/1000/60/60)%24
-const minutes=Math.floor(diff/1000/60)%60
+let h=Math.floor(diff/3600000)
+let m=Math.floor(diff/60000)%60
+let s=Math.floor(diff/1000)%60
 
-document.getElementById("timer").innerText=
-days+" días "+hours+" horas "+minutes+" min"
+document.getElementById("timer").innerText=h+"h "+m+"m "+s+"s"
 
-}
+},1000)
 
-function setDeadline(){
-
-const d=document.getElementById("deadlineInput").value
-
-localStorage.setItem("deadline",d)
-
-deadline=d
-
-alert("Deadline guardado")
+})
 
 }
 
-setInterval(updateTimer,1000)
-
-setInterval(loadScore,3000)
+cargarTablero()
+cargarTareas()
+cargarRanking()
+adminPanel()
+timer()
 
 </script>
 
