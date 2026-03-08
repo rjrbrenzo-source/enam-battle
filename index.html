@@ -4,121 +4,144 @@
 <meta charset="UTF-8">
 <title>ENAM Battle</title>
 
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<link rel="manifest" href="manifest.json">
+
 <style>
 
 body{
 font-family:Arial;
 text-align:center;
-background:#f4f4f4;
+background:#eef2ff;
 }
 
 button{
 padding:10px;
-margin:5px;
+margin:6px;
 }
 
-.board{
-display:flex;
-flex-wrap:wrap;
-max-width:500px;
-margin:auto;
+#board{
+display:grid;
+grid-template-columns:repeat(5,70px);
+grid-gap:8px;
+justify-content:center;
+margin-top:20px;
 }
 
 .cell{
-width:100px;
-height:80px;
-border:2px solid black;
-margin:5px;
+width:70px;
+height:70px;
+border-radius:12px;
+background:white;
+border:2px solid #444;
 display:flex;
 align-items:center;
 justify-content:center;
+font-size:22px;
+transition:all 0.3s;
+}
+
+.cell.active{
+background:#c7d2fe;
+}
+
+#victory{
+display:none;
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:#000000cc;
+color:white;
+font-size:28px;
+align-items:center;
+justify-content:center;
 flex-direction:column;
-background:white;
-}
-
-.playerRenzo{
-color:blue;
-font-weight:bold;
-}
-
-.playerAnita{
-color:red;
-font-weight:bold;
 }
 
 .admin{
-margin-top:30px;
-border-top:2px solid black;
+margin-top:40px;
+border-top:2px solid #333;
 padding-top:20px;
 }
 
 </style>
-
 </head>
 
 <body>
 
 <h1>ENAM Battle</h1>
 
-<h2>Selecciona jugador</h2>
+<h3 id="player"></h3>
 
 <button onclick="setPlayer('Renzo')">Soy Renzo</button>
 <button onclick="setPlayer('Anita')">Soy Anita</button>
 
-<h3 id="player"></h3>
-
-<h2>Tiempo restante</h2>
-
+<h2>⏳ Tiempo restante</h2>
 <div id="timer"></div>
 
-<h2>Tareas</h2>
+<h2>🎮 Tablero</h2>
 
-<button onclick="task('Curso 1 qx: Resumen base')">Resumen base</button>
-<button onclick="task('Curso 1 qx: Eva')">Eva</button>
-<button onclick="task('Curso 1 qx: Estudia conmigo')">Estudia conmigo</button>
+<div id="board">
 
-<button onclick="task('Curso 2 Usa: Org mental')">Org mental</button>
-<button onclick="task('Curso 2 Usa: Resumen base')">Resumen base</button>
-<button onclick="task('Curso 2 Usa: Banqueo')">Banqueo</button>
-<button onclick="task('Curso 2 Usa: Casos esenciales')">Casos esenciales</button>
-
-<h2>Tablero</h2>
-
-<div class="board">
-
-<div class="cell">Inicio</div>
-<div class="cell">1<br><span id="r1"></span><span id="a1"></span></div>
-<div class="cell">2<br><span id="r2"></span><span id="a2"></span></div>
-<div class="cell">3<br><span id="r3"></span><span id="a3"></span></div>
-<div class="cell">4<br><span id="r4"></span><span id="a4"></span></div>
-<div class="cell">5<br><span id="r5"></span><span id="a5"></span></div>
-<div class="cell">6<br><span id="r6"></span><span id="a6"></span></div>
-<div class="cell">7<br><span id="r7"></span><span id="a7"></span></div>
 <div class="cell">🏁</div>
+<div class="cell" id="c7"></div>
+<div class="cell" id="c6"></div>
+<div class="cell" id="c5"></div>
+<div class="cell" id="c4"></div>
+<div class="cell" id="c3"></div>
+<div class="cell" id="c2"></div>
+<div class="cell" id="c1"></div>
+<div class="cell">Inicio</div>
 
 </div>
 
-<h2>Puntaje</h2>
+<h2>📋 Tareas</h2>
 
-Renzo: <span id="renzo">0</span>
+<button onclick="task('Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
+<button onclick="task('Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
+<button onclick="task('Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
 
+<button onclick="task('Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
+<button onclick="task('Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
+<button onclick="task('Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
+<button onclick="task('Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
+
+<h2>📊 Ranking semanal</h2>
+
+Renzo: <span id="renzo">0</span> pts  
 <br><br>
+Anita: <span id="anita">0</span> pts  
 
-Anita: <span id="anita">0</span>
-
-<h2 id="winner"></h2>
+<h3 id="message"></h3>
 
 <div class="admin">
 
-<h2>ADMIN</h2>
+<h2>👑 ADMIN</h2>
 
-<p>Fijar deadline semanal</p>
+<p>Deadline</p>
 
 <input type="date" id="deadlineInput">
 
-<button onclick="setDeadline()">Guardar Deadline</button>
+<br><br>
+
+<button onclick="setDeadline()">Guardar deadline</button>
 
 </div>
+
+<div id="victory">
+
+<div id="victoryText"></div>
+
+<button onclick="closeVictory()">Cerrar</button>
+
+</div>
+
+<audio id="sound">
+<source src="https://actions.google.com/sounds/v1/cartoon/clang_and_wobble.ogg">
+</audio>
 
 <script>
 
@@ -128,10 +151,20 @@ const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdL
 
 let deadline=localStorage.getItem("deadline") || "2026-03-15"
 
+const messages=[
+"💪 ¡Vamos! cada tarea es un paso al 15 en el ENAM",
+"❤️ Anita y Renzo, equipo invencible",
+"🔥 El esfuerzo de hoy será el orgullo de mañana",
+"📚 Una tarea más cerca del sueño",
+"🏆 El ganador invita la cita"
+]
+
 function setPlayer(p){
 
 player=p
+
 document.getElementById("player").innerText="Jugador: "+p
+
 loadScore()
 
 }
@@ -139,9 +172,14 @@ loadScore()
 function task(t){
 
 if(player==""){
+
 alert("Selecciona jugador")
+
 return
+
 }
+
+document.getElementById("sound").play()
 
 fetch(API,{
 method:"POST",
@@ -167,6 +205,7 @@ let a=0
 for(let i=1;i<data.length;i++){
 
 if(data[i][0]=="Renzo") r++
+
 if(data[i][0]=="Anita") a++
 
 }
@@ -178,6 +217,8 @@ drawBoard(r,a)
 
 checkWinner(r,a)
 
+randomMessage()
+
 })
 
 }
@@ -186,21 +227,51 @@ function drawBoard(r,a){
 
 for(let i=1;i<=7;i++){
 
-document.getElementById("r"+i).innerText=""
-document.getElementById("a"+i).innerText=""
+document.getElementById("c"+i).innerText=""
 
 }
 
-if(r>0 && r<=7) document.getElementById("r"+r).innerText="🔵"
-if(a>0 && a<=7) document.getElementById("a"+a).innerText="🔴"
+if(r>0) document.getElementById("c"+r).innerText+="🔵"
+
+if(a>0) document.getElementById("c"+a).innerText+="🔴"
 
 }
 
 function checkWinner(r,a){
 
-if(r>=7) document.getElementById("winner").innerText="🏆 Ganador: Renzo"
+if(r>=7){
 
-if(a>=7) document.getElementById("winner").innerText="🏆 Ganadora: Anita"
+showVictory("🏆 Renzo gana la semana")
+
+}
+
+if(a>=7){
+
+showVictory("🏆 Anita gana la semana")
+
+}
+
+}
+
+function showVictory(text){
+
+document.getElementById("victoryText").innerText=text
+
+document.getElementById("victory").style.display="flex"
+
+}
+
+function closeVictory(){
+
+document.getElementById("victory").style.display="none"
+
+}
+
+function randomMessage(){
+
+const m=messages[Math.floor(Math.random()*messages.length)]
+
+document.getElementById("message").innerText=m
 
 }
 
@@ -214,7 +285,7 @@ const diff=d-now
 
 if(diff<=0){
 
-document.getElementById("timer").innerText="⛔ Competencia cerrada"
+document.getElementById("timer").innerText="⛔ Semana cerrada"
 
 return
 
@@ -229,8 +300,6 @@ days+" días "+hours+" horas "+minutes+" min"
 
 }
 
-setInterval(updateTimer,1000)
-
 function setDeadline(){
 
 const d=document.getElementById("deadlineInput").value
@@ -243,7 +312,9 @@ alert("Deadline guardado")
 
 }
 
-setInterval(loadScore,4000)
+setInterval(updateTimer,1000)
+
+setInterval(loadScore,3000)
 
 </script>
 
