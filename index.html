@@ -13,28 +13,43 @@ background:#f4f4f4;
 }
 
 button{
-padding:12px;
-margin:6px;
-font-size:16px;
+padding:10px;
+margin:5px;
 }
 
 .board{
 display:flex;
 flex-wrap:wrap;
-max-width:420px;
+max-width:500px;
 margin:auto;
 }
 
 .cell{
-width:90px;
-height:70px;
+width:100px;
+height:80px;
 border:2px solid black;
 margin:5px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:12px;
+flex-direction:column;
 background:white;
+}
+
+.playerRenzo{
+color:blue;
+font-weight:bold;
+}
+
+.playerAnita{
+color:red;
+font-weight:bold;
+}
+
+.admin{
+margin-top:30px;
+border-top:2px solid black;
+padding-top:20px;
 }
 
 </style>
@@ -45,7 +60,7 @@ background:white;
 
 <h1>ENAM Battle</h1>
 
-<h2>Jugador</h2>
+<h2>Selecciona jugador</h2>
 
 <button onclick="setPlayer('Renzo')">Soy Renzo</button>
 <button onclick="setPlayer('Anita')">Soy Anita</button>
@@ -53,32 +68,33 @@ background:white;
 <h3 id="player"></h3>
 
 <h2>Tiempo restante</h2>
+
 <div id="timer"></div>
 
 <h2>Tareas</h2>
 
-<button onclick="task('Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
-<button onclick="task('Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
-<button onclick="task('Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
+<button onclick="task('Curso 1 qx: Resumen base')">Resumen base</button>
+<button onclick="task('Curso 1 qx: Eva')">Eva</button>
+<button onclick="task('Curso 1 qx: Estudia conmigo')">Estudia conmigo</button>
 
-<button onclick="task('Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
-<button onclick="task('Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
-<button onclick="task('Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
-<button onclick="task('Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
+<button onclick="task('Curso 2 Usa: Org mental')">Org mental</button>
+<button onclick="task('Curso 2 Usa: Resumen base')">Resumen base</button>
+<button onclick="task('Curso 2 Usa: Banqueo')">Banqueo</button>
+<button onclick="task('Curso 2 Usa: Casos esenciales')">Casos esenciales</button>
 
 <h2>Tablero</h2>
 
 <div class="board">
 
 <div class="cell">Inicio</div>
-<div class="cell">1</div>
-<div class="cell">2</div>
-<div class="cell">3</div>
-<div class="cell">4</div>
-<div class="cell">5</div>
-<div class="cell">6</div>
-<div class="cell">7</div>
-<div class="cell">🏁 Meta</div>
+<div class="cell">1<br><span id="r1"></span><span id="a1"></span></div>
+<div class="cell">2<br><span id="r2"></span><span id="a2"></span></div>
+<div class="cell">3<br><span id="r3"></span><span id="a3"></span></div>
+<div class="cell">4<br><span id="r4"></span><span id="a4"></span></div>
+<div class="cell">5<br><span id="r5"></span><span id="a5"></span></div>
+<div class="cell">6<br><span id="r6"></span><span id="a6"></span></div>
+<div class="cell">7<br><span id="r7"></span><span id="a7"></span></div>
+<div class="cell">🏁</div>
 
 </div>
 
@@ -90,11 +106,27 @@ Renzo: <span id="renzo">0</span>
 
 Anita: <span id="anita">0</span>
 
+<h2 id="winner"></h2>
+
+<div class="admin">
+
+<h2>ADMIN</h2>
+
+<p>Fijar deadline semanal</p>
+
+<input type="date" id="deadlineInput">
+
+<button onclick="setDeadline()">Guardar Deadline</button>
+
+</div>
+
 <script>
 
 let player=""
 
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
+
+let deadline=localStorage.getItem("deadline") || "2026-03-15"
 
 function setPlayer(p){
 
@@ -119,7 +151,7 @@ tarea:t
 })
 })
 
-loadScore()
+setTimeout(loadScore,1000)
 
 }
 
@@ -142,30 +174,76 @@ if(data[i][0]=="Anita") a++
 document.getElementById("renzo").innerText=r
 document.getElementById("anita").innerText=a
 
+drawBoard(r,a)
+
+checkWinner(r,a)
+
 })
 
 }
 
-setInterval(loadScore,3000)
+function drawBoard(r,a){
 
-const deadline=new Date("2026-03-15")
+for(let i=1;i<=7;i++){
+
+document.getElementById("r"+i).innerText=""
+document.getElementById("a"+i).innerText=""
+
+}
+
+if(r>0 && r<=7) document.getElementById("r"+r).innerText="🔵"
+if(a>0 && a<=7) document.getElementById("a"+a).innerText="🔴"
+
+}
+
+function checkWinner(r,a){
+
+if(r>=7) document.getElementById("winner").innerText="🏆 Ganador: Renzo"
+
+if(a>=7) document.getElementById("winner").innerText="🏆 Ganadora: Anita"
+
+}
 
 function updateTimer(){
 
 const now=new Date()
 
-const diff=deadline-now
+const d=new Date(deadline)
 
-const d=Math.floor(diff/1000/60/60/24)
-const h=Math.floor(diff/1000/60/60)%24
-const m=Math.floor(diff/1000/60)%60
+const diff=d-now
+
+if(diff<=0){
+
+document.getElementById("timer").innerText="⛔ Competencia cerrada"
+
+return
+
+}
+
+const days=Math.floor(diff/1000/60/60/24)
+const hours=Math.floor(diff/1000/60/60)%24
+const minutes=Math.floor(diff/1000/60)%60
 
 document.getElementById("timer").innerText=
-d+" días "+h+" horas "+m+" min"
+days+" días "+hours+" horas "+minutes+" min"
 
 }
 
 setInterval(updateTimer,1000)
+
+function setDeadline(){
+
+const d=document.getElementById("deadlineInput").value
+
+localStorage.setItem("deadline",d)
+
+deadline=d
+
+alert("Deadline guardado")
+
+}
+
+setInterval(loadScore,4000)
 
 </script>
 
