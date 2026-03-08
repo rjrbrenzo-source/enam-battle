@@ -5,61 +5,20 @@
 <title>ENAM Battle</title>
 
 <style>
-body{
-font-family:Arial;
-text-align:center;
-background:#f4f4f4;
-}
-.info{
-background:white;
-padding:12px;
-border:2px solid black;
-margin:10px;
-font-weight:bold;
-}
-button{
-padding:10px;
-margin:6px;
-font-size:14px;
-border:none;
-cursor:pointer;
-}
-button:disabled{
-background:#cccccc;
-cursor:not-allowed;
-}
-.renzoColor{background:#4da6ff;}
-.anitaColor{background:#ffd633;}
-.bothColor{background:#66cc66;}
-.board{
-display:flex;
-flex-wrap:wrap;
-max-width:420px;
-margin:auto;
-}
-.cell{
-width:90px;
-height:70px;
-border:2px solid black;
-margin:5px;
-display:flex;
-align-items:center;
-justify-content:center;
-font-size:13px;
-background:white;
-}
-.winnerBox{
-background:white;
-border:3px solid black;
-padding:20px;
-margin:20px;
-font-size:18px;
-}
+body{ font-family:Arial; text-align:center; background:#f4f4f4; }
+.info{ background:white; padding:12px; border:2px solid black; margin:10px; font-weight:bold; }
+button{ padding:10px; margin:6px; font-size:14px; border:none; cursor:pointer; }
+button:disabled{ background:#cccccc; cursor:not-allowed; }
+.renzoColor{ background:#4da6ff; }
+.anitaColor{ background:#ffd633; }
+.bothColor{ background:#66cc66; }
+.board{ display:flex; flex-wrap:wrap; max-width:420px; margin:auto; }
+.cell{ width:90px; height:70px; border:2px solid black; margin:5px; display:flex; align-items:center; justify-content:center; font-size:13px; background:white; }
+.winnerBox{ background:white; border:3px solid black; padding:20px; margin:20px; font-size:18px; }
 </style>
 </head>
 
 <body>
-
 <h1>ENAM Battle</h1>
 
 <div class="info">
@@ -75,7 +34,6 @@ Deadline: 15 Marzo 2026 – 11:00 PM
 <h2>Jugador</h2>
 <button onclick="setPlayer('Renzo')">Soy Renzo</button>
 <button onclick="setPlayer('Anita')">Soy Anita</button>
-
 <h3 id="player"></h3>
 
 <h2>Tareas</h2>
@@ -108,7 +66,6 @@ Anita: <span id="anita">0</span>
 <div id="winner"></div>
 
 <script>
-
 let player=""
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 const DEADLINE=new Date("2026-03-15T23:00:00")
@@ -123,8 +80,20 @@ const tareas=[
 "Curso 2 Neurología: Casos esenciales"
 ]
 
-// Lista de premios para parejas (aleatorios)
-const premios=["Cena romántica 🍝","Masaje de 30 min 💆","Película elegida 🎬","Desayuno en cama ☕","Salida sorpresa 🌅","Vale por 3 favores 💋"]
+// Lista de 50 premios para parejas
+const premios=[
+"Cena romántica 🍝","Masaje de 30 min 💆","Película elegida 🎬","Desayuno en cama ☕","Salida sorpresa 🌅",
+"Vale por 3 favores 💋","Paseo por la ciudad 🚶‍♀️🚶‍♂️","Helado juntos 🍨","Baño de burbujas 🛁","Juego de mesa juntos 🎲",
+"Sesión de fotos 📸","Comprar un postre favorito 🍰","Noche de karaoke 🎤","Picnic en parque 🌳","Café juntos ☕",
+"Leer un libro juntos 📚","Yoga en pareja 🧘‍♀️🧘‍♂️","Playlist personalizada 🎵","Maratón de series 📺","Escribir cartas de amor 💌",
+"Puzzle juntos 🧩","Video sorpresa 🎥","Mensaje romántico sorpresa 💌","Decoración sorpresa de habitación 🎀","Salir a caminar al atardecer 🌇",
+"Clase de cocina juntos 🍳","Helado nocturno 🍦","Mini spa casero 🛀","Comprar un regalo sorpresa 🎁","Sesión de dibujo juntos ✏️",
+"Escribir un poema juntos ✍️","Noche de juegos de cartas 🃏","Ver fotos antiguas juntos 📷","Hacer playlist de recuerdos 🎶","Tiempo sin celular juntos ⏳",
+"Postre sorpresa hecho en casa 🍮","Noche de pizza 🍕","Enviar mensaje lindo durante el día 💌","Tarde de pelis románticas 🍿","Preparar desayuno juntos 🥐",
+"Paseo en bici 🚴‍♂️🚴‍♀️","Noche de velas 🕯️","Ver el amanecer juntos 🌅","Tomar helado en parque 🍦","Hacer ejercicio juntos 🏃‍♂️🏃‍♀️",
+"Regalo hecho a mano 🎨","Sesión de memes divertidos 😂","Compartir un chocolate 🍫","Escribir un diario juntos 📖","Plantar una flor 🌸",
+"Tomar té juntos 🍵","Jugar videojuego juntos 🎮","Foto divertida juntos 🤳"
+]
 
 function setPlayer(p){
 player=p
@@ -137,18 +106,11 @@ function gameEnded(){ return new Date()>DEADLINE }
 function task(i){
 if(gameEnded()){ alert("El juego terminó"); return }
 if(player==""){ alert("Selecciona jugador"); return }
-fetch(API,{
-method:"POST",
-body:JSON.stringify({jugador:player,tarea:tareas[i]})
-})
+fetch(API,{method:"POST", body:JSON.stringify({jugador:player,tarea:tareas[i]})})
 setTimeout(loadScore,800)
 }
 
-function disableButtons(){
-for(let i=0;i<tareas.length;i++){
-document.getElementById("t"+i).disabled=true
-}
-}
+function disableButtons(){ for(let i=0;i<tareas.length;i++){ document.getElementById("t"+i).disabled=true } }
 
 function loadScore(){
 fetch(API).then(r=>r.json()).then(data=>{
@@ -199,11 +161,10 @@ else if(a>r) document.getElementById("leader").innerText="🏆 Anita va ganando"
 else document.getElementById("leader").innerText="Empate"
 }
 
-// Selecciona 2 premios aleatorios para el ganador
+// Selecciona 5 premios aleatorios de 50
 function premiosAleatorios(){
-let copia=Array.from(premios)
-let seleccion=[]
-for(let i=0;i<2;i++){
+let copia=Array.from(premios), seleccion=[]
+for(let i=0;i<5;i++){
 let idx=Math.floor(Math.random()*copia.length)
 seleccion.push(copia[idx])
 copia.splice(idx,1)
@@ -223,8 +184,7 @@ ${premiosAleatorios()}
 function checkWinner(r,a){
 if(r>=7){ disableButtons(); showPrizes("Renzo"); return }
 if(a>=7){ disableButtons(); showPrizes("Anita"); return }
-if(gameEnded()){
-disableButtons()
+if(gameEnded()){ disableButtons()
 if(r>a){ showPrizes("Renzo") }
 else if(a>r){ showPrizes("Anita") }
 else{ document.getElementById("winner").innerHTML="<div class='winnerBox'>🤝 Empate</div>" }
@@ -244,7 +204,6 @@ document.getElementById("timer").innerText="⏳ Tiempo restante: "+d+"d "+h+"h "
 
 setInterval(updateTimer,1000)
 setInterval(loadScore,3000)
-
 </script>
 </body>
 </html>
