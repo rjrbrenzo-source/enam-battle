@@ -13,9 +13,9 @@ background:#f4f4f4;
 }
 
 button{
-padding:10px;
-margin:5px;
-font-size:14px;
+padding:12px;
+margin:6px;
+font-size:16px;
 }
 
 .board{
@@ -35,7 +35,6 @@ align-items:center;
 justify-content:center;
 font-size:12px;
 background:white;
-position:relative;
 }
 
 </style>
@@ -53,40 +52,43 @@ position:relative;
 
 <h3 id="player"></h3>
 
+<h2>Tiempo restante</h2>
+<div id="timer"></div>
+
 <h2>Tareas</h2>
 
-<button id="t1" onclick="task(1,'Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
-<button id="t2" onclick="task(2,'Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
-<button id="t3" onclick="task(3,'Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
+<button onclick="task('Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
+<button onclick="task('Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
+<button onclick="task('Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
 
-<button id="t4" onclick="task(4,'Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
-<button id="t5" onclick="task(5,'Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
-<button id="t6" onclick="task(6,'Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
-<button id="t7" onclick="task(7,'Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
+<button onclick="task('Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
+<button onclick="task('Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
+<button onclick="task('Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
+<button onclick="task('Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
 
 <h2>Tablero</h2>
 
 <div class="board">
 
-<div class="cell" id="c0">Inicio</div>
-<div class="cell" id="c1">1</div>
-<div class="cell" id="c2">2</div>
-<div class="cell" id="c3">3</div>
-<div class="cell" id="c4">4</div>
-<div class="cell" id="c5">5</div>
-<div class="cell" id="c6">6</div>
-<div class="cell" id="c7">7</div>
-<div class="cell" id="c8">🏁</div>
+<div class="cell">Inicio</div>
+<div class="cell">1</div>
+<div class="cell">2</div>
+<div class="cell">3</div>
+<div class="cell">4</div>
+<div class="cell">5</div>
+<div class="cell">6</div>
+<div class="cell">7</div>
+<div class="cell">🏁 Meta</div>
 
 </div>
 
 <h2>Puntaje</h2>
 
 Renzo: <span id="renzo">0</span>
-<br><br>
-Anita: <span id="anita">0</span>
 
-<h2 id="leader"></h2>
+<br><br>
+
+Anita: <span id="anita">0</span>
 
 <script>
 
@@ -94,23 +96,15 @@ let player=""
 
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 
-const tareas=[
-"Curso 1 qx: Resumen base",
-"Curso 1 qx: Eva",
-"Curso 1 qx: Estudia conmigo",
-"Curso 2 Usa: Org mental",
-"Curso 2 Usa: Resumen base",
-"Curso 2 Usa: Banqueo",
-"Curso 2 Usa: Casos esenciales"
-]
-
 function setPlayer(p){
+
 player=p
 document.getElementById("player").innerText="Jugador: "+p
 loadScore()
+
 }
 
-function task(id,t){
+function task(t){
 
 if(player==""){
 alert("Selecciona jugador")
@@ -125,7 +119,7 @@ tarea:t
 })
 })
 
-setTimeout(loadScore,1000)
+loadScore()
 
 }
 
@@ -138,70 +132,40 @@ fetch(API)
 let r=0
 let a=0
 
-let tareasEstado={}
-
 for(let i=1;i<data.length;i++){
 
-let jugador=data[i][0]
-let tarea=data[i][1]
-
-if(jugador=="Renzo") r++
-if(jugador=="Anita") a++
-
-tareasEstado[tarea]=jugador
+if(data[i][0]=="Renzo") r++
+if(data[i][0]=="Anita") a++
 
 }
 
 document.getElementById("renzo").innerText=r
 document.getElementById("anita").innerText=a
 
-drawPieces(r,a)
-updateTasks(tareasEstado)
-
-if(r>a){
-document.getElementById("leader").innerText="🏆 Renzo va ganando"
-}
-else if(a>r){
-document.getElementById("leader").innerText="🏆 Anita va ganando"
-}
-else{
-document.getElementById("leader").innerText="Empate"
-}
-
 })
 
 }
 
-function updateTasks(est){
-
-for(let i=0;i<tareas.length;i++){
-
-let btn=document.getElementById("t"+(i+1))
-
-if(est[tareas[i]]=="Renzo"){
-btn.innerText=tareas[i]+" R"
-}
-
-if(est[tareas[i]]=="Anita"){
-btn.innerText=tareas[i]+" A"
-}
-
-}
-
-}
-
-function drawPieces(r,a){
-
-for(let i=0;i<=8;i++){
-document.getElementById("c"+i).innerHTML=i==0?"Inicio":i
-}
-
-document.getElementById("c"+r).innerHTML+=" R"
-document.getElementById("c"+a).innerHTML+=" A"
-
-}
-
 setInterval(loadScore,3000)
+
+const deadline=new Date("2026-03-15")
+
+function updateTimer(){
+
+const now=new Date()
+
+const diff=deadline-now
+
+const d=Math.floor(diff/1000/60/60/24)
+const h=Math.floor(diff/1000/60/60)%24
+const m=Math.floor(diff/1000/60)%60
+
+document.getElementById("timer").innerText=
+d+" días "+h+" horas "+m+" min"
+
+}
+
+setInterval(updateTimer,1000)
 
 </script>
 
