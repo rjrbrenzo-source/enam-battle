@@ -1,1 +1,157 @@
+<!DOCTYPE html>
+<html>
 
+<head>
+
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<title>ENAM Battle</title>
+
+<style>
+
+body{
+font-family:Arial;
+text-align:center;
+background:#f2f2f2;
+}
+
+#board{
+display:flex;
+justify-content:center;
+flex-wrap:wrap;
+}
+
+.cell{
+width:60px;
+height:60px;
+border:2px solid black;
+margin:5px;
+border-radius:10px;
+background:white;
+}
+
+.renzo{
+background:green;
+}
+
+.pareja{
+background:red;
+}
+
+button{
+padding:10px;
+margin:5px;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<h1>🏆 ENAM BATTLE</h1>
+
+<select id="player">
+
+<option value="Renzo">Renzo</option>
+<option value="Pareja">Pareja</option>
+
+</select>
+
+<h2>🎲 Tablero</h2>
+
+<div id="board"></div>
+
+<h2>📚 Tareas</h2>
+
+<div id="tasks"></div>
+
+<h2>🏆 Puntaje</h2>
+
+<div id="score"></div>
+
+<script>
+
+let renzo=0
+let pareja=0
+
+const tasks=[
+
+"Curso 1 qx: Resumen base",
+"Curso 1 qx: Eva",
+"Curso 1 qx: Estudia conmigo",
+"Curso 2 Usa: Org mental",
+"Curso 2 Usa: Resumen base",
+"Curso 2 Usa: Banqueo",
+"Curso 2 Usa: Casos esenciales"
+
+]
+
+const board=document.getElementById("board")
+
+for(let i=0;i<tasks.length;i++){
+
+let cell=document.createElement("div")
+cell.className="cell"
+cell.id="cell"+i
+
+board.appendChild(cell)
+
+}
+
+const tasksDiv=document.getElementById("tasks")
+
+tasks.forEach(t=>{
+
+let btn=document.createElement("button")
+btn.innerText=t
+
+btn.onclick=()=>completeTask()
+
+tasksDiv.appendChild(btn)
+
+})
+
+function completeTask(){
+
+let player=document.getElementById("player").value
+
+if(player=="Renzo") renzo++
+if(player=="Pareja") pareja++
+
+updateBoard()
+
+}
+
+function updateBoard(){
+
+for(let i=0;i<tasks.length;i++){
+
+document.getElementById("cell"+i).classList.remove("renzo")
+document.getElementById("cell"+i).classList.remove("pareja")
+
+}
+
+if(renzo>0){
+
+document.getElementById("cell"+(renzo-1)).classList.add("renzo")
+
+}
+
+if(pareja>0){
+
+document.getElementById("cell"+(pareja-1)).classList.add("pareja")
+
+}
+
+document.getElementById("score").innerText=
+
+"Renzo: "+renzo+" | Pareja: "+pareja
+
+}
+
+</script>
+
+</body>
+
+</html>
