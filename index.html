@@ -14,7 +14,7 @@ background:#f4f4f4;
 
 .info{
 background:white;
-padding:10px;
+padding:12px;
 border:2px solid black;
 margin:10px;
 font-weight:bold;
@@ -22,7 +22,7 @@ font-weight:bold;
 
 button{
 padding:10px;
-margin:5px;
+margin:6px;
 font-size:14px;
 border:none;
 cursor:pointer;
@@ -52,7 +52,7 @@ margin:5px;
 display:flex;
 align-items:center;
 justify-content:center;
-font-size:14px;
+font-size:13px;
 background:white;
 }
 
@@ -72,6 +72,8 @@ font-size:18px;
 <h1>ENAM Battle</h1>
 
 <div class="info">
+<b>Semana 1</b>
+<br>
 Curso 1: Ginecología | Curso 2: Neurología
 <br>
 Deadline: 15 Marzo 2026 – 11:00 PM
@@ -86,13 +88,13 @@ Deadline: 15 Marzo 2026 – 11:00 PM
 
 <h2>Tareas</h2>
 
-<button id="t0" onclick="task(0)">Resumen base</button>
-<button id="t1" onclick="task(1)">Eva</button>
-<button id="t2" onclick="task(2)">Estudia conmigo</button>
-<button id="t3" onclick="task(3)">Org mental</button>
-<button id="t4" onclick="task(4)">Resumen base</button>
-<button id="t5" onclick="task(5)">Banqueo</button>
-<button id="t6" onclick="task(6)">Casos esenciales</button>
+<button id="t0" onclick="task(0)">Curso 1 Ginecología: Resumen base</button>
+<button id="t1" onclick="task(1)">Curso 1 Ginecología: Eva</button>
+<button id="t2" onclick="task(2)">Curso 1 Ginecología: Estudia conmigo</button>
+<button id="t3" onclick="task(3)">Curso 2 Neurología: Org mental</button>
+<button id="t4" onclick="task(4)">Curso 2 Neurología: Resumen base</button>
+<button id="t5" onclick="task(5)">Curso 2 Neurología: Banqueo</button>
+<button id="t6" onclick="task(6)">Curso 2 Neurología: Casos esenciales</button>
 
 <h2>Tablero</h2>
 
@@ -128,13 +130,13 @@ const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdL
 const DEADLINE=new Date("2026-03-15T23:00:00")
 
 const tareas=[
-"Curso1 Resumen",
-"Curso1 Eva",
-"Curso1 Estudia",
-"Curso2 Org",
-"Curso2 Resumen",
-"Curso2 Banqueo",
-"Curso2 Casos"
+"Curso 1 Ginecología: Resumen base",
+"Curso 1 Ginecología: Eva",
+"Curso 1 Ginecología: Estudia conmigo",
+"Curso 2 Neurología: Org mental",
+"Curso 2 Neurología: Resumen base",
+"Curso 2 Neurología: Banqueo",
+"Curso 2 Neurología: Casos esenciales"
 ]
 
 function setPlayer(p){
@@ -288,7 +290,7 @@ document.getElementById("winner").innerHTML=
 
 🏆 ${winner} ganó el ENAM Battle
 
-<h3>Premios posibles 💑</h3>
+<h3>Premios para parejas 💑</h3>
 
 • Cena romántica pagada por el perdedor 🍝  
 • Masaje de 30 minutos 💆  
@@ -304,14 +306,12 @@ function checkWinner(r,a){
 
 if(r>=7){
 disableButtons()
-document.getElementById("winner").innerHTML="<div class='winnerBox'>🏆 Renzo llegó a META y ganó</div>"
 showPrizes("Renzo")
 return
 }
 
 if(a>=7){
 disableButtons()
-document.getElementById("winner").innerHTML="<div class='winnerBox'>🏆 Anita llegó a META y ganó</div>"
 showPrizes("Anita")
 return
 }
