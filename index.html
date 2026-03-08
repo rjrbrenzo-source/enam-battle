@@ -4,43 +4,46 @@
 <head>
 
 <meta charset="UTF-8">
-<title>ENAM Game</title>
-
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ENAM Battle</title>
 
 <style>
 
 body{
 font-family:Arial;
-background:#0f172a;
-color:white;
 text-align:center;
+background:#f4f4f4;
 }
 
 button{
 padding:10px;
 margin:5px;
-border-radius:10px;
-border:none;
-background:#38bdf8;
-color:white;
-font-size:15px;
+width:250px;
 }
 
-.tarea{
-background:#1e293b;
-margin:8px;
-padding:10px;
-border-radius:10px;
+.board{
+display:flex;
+flex-wrap:wrap;
+max-width:500px;
+margin:auto;
 }
 
-.bloqueada{
-opacity:0.4;
+.cell{
+width:110px;
+height:90px;
+border:2px solid black;
+margin:5px;
+display:flex;
+align-items:center;
+justify-content:center;
+flex-direction:column;
+background:white;
+font-size:12px;
 }
 
-.puntaje{
-font-size:20px;
-margin:10px;
+.admin{
+margin-top:30px;
+border-top:2px solid black;
+padding-top:20px;
 }
 
 </style>
@@ -49,158 +52,127 @@ margin:10px;
 
 <body>
 
-<h1>🎮 ENAM GAME</h1>
+<h1>ENAM Battle</h1>
 
-<h3>Curso 1: Ginecología</h3>
-<h3>Curso 2: Neurología</h3>
+<h2>Jugador</h2>
 
-<h3>Selecciona jugador</h3>
+<button onclick="setPlayer('Renzo')">Soy Renzo</button>
+<button onclick="setPlayer('Anita')">Soy Anita</button>
 
-<button onclick="setJugador('Renzo')">Jugador Renzo</button>
-<button onclick="setJugador('Anita')">Jugador Anita</button>
+<h3 id="player"></h3>
 
-<h2 id="jugador"></h2>
+<h2>Tiempo restante</h2>
 
-<h2>⏳ Tiempo restante</h2>
-<h2 id="timer"></h2>
+<div id="timer"></div>
 
-<button onclick="verCompetencia()">🏁 Competencia</button>
-<button onclick="verTareas()">📚 Tareas</button>
-<button onclick="configurarDeadline()">⏱ Deadline</button>
+<h2>Tareas</h2>
 
-<div id="contenido"></div>
+<button onclick="task('Curso 1 qx: Resumen base')">Curso 1 qx: Resumen base</button>
+
+<button onclick="task('Curso 1 qx: Eva')">Curso 1 qx: Eva</button>
+
+<button onclick="task('Curso 1 qx: Estudia conmigo')">Curso 1 qx: Estudia conmigo</button>
+
+<button onclick="task('Curso 2 Usa: Org mental')">Curso 2 Usa: Org mental</button>
+
+<button onclick="task('Curso 2 Usa: Resumen base')">Curso 2 Usa: Resumen base</button>
+
+<button onclick="task('Curso 2 Usa: Banqueo')">Curso 2 Usa: Banqueo</button>
+
+<button onclick="task('Curso 2 Usa: Casos esenciales')">Curso 2 Usa: Casos esenciales</button>
+
+<h2>Tablero</h2>
+
+<div class="board">
+
+<div class="cell">Inicio</div>
+
+<div class="cell">1<br><span id="r1"></span><span id="a1"></span></div>
+
+<div class="cell">2<br><span id="r2"></span><span id="a2"></span></div>
+
+<div class="cell">3<br><span id="r3"></span><span id="a3"></span></div>
+
+<div class="cell">4<br><span id="r4"></span><span id="a4"></span></div>
+
+<div class="cell">5<br><span id="r5"></span><span id="a5"></span></div>
+
+<div class="cell">6<br><span id="r6"></span><span id="a6"></span></div>
+
+<div class="cell">7<br><span id="r7"></span><span id="a7"></span></div>
+
+<div class="cell">🏁</div>
+
+</div>
+
+<h2>Puntaje</h2>
+
+Renzo: <span id="renzo">0</span>
+
+<br><br>
+
+Anita: <span id="anita">0</span>
+
+<h2 id="winner"></h2>
+
+<h2>Copas</h2>
+
+Renzo 🏆 <span id="cupRenzo">0</span>
+
+<br><br>
+
+Anita 🏆 <span id="cupAnita">0</span>
+
+<div class="admin">
+
+<h2>ADMIN</h2>
+
+<p>Curso 1</p>
+
+<input id="curso1">
+
+<p>Curso 2</p>
+
+<input id="curso2">
+
+<p>Deadline</p>
+
+<input type="date" id="deadlineInput">
+
+<br><br>
+
+<button onclick="restartGame()">Reiniciar semana</button>
+
+</div>
 
 <script>
 
+let player=""
+
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 
-let jugador=""
+let deadline=localStorage.getItem("deadline") || "2026-03-15"
 
-const tareas=[
+let cupRenzo=localStorage.getItem("cupRenzo") || 0
 
-"Curso 1 qx: Resumen base",
-"Curso 1 qx: Eva",
-"Curso 1 qx: Estudia conmigo",
-"Curso 2 Usa: Org mental",
-"Curso 2 Usa: Resumen base",
-"Curso 2 Usa: Banqueo",
-"Curso 2 Usa: Casos esenciales"
+let cupAnita=localStorage.getItem("cupAnita") || 0
 
-]
+document.getElementById("cupRenzo").innerText=cupRenzo
+document.getElementById("cupAnita").innerText=cupAnita
 
-function setJugador(n){
+function setPlayer(p){
 
-jugador=n
+player=p
 
-document.getElementById("jugador").innerText="Jugador: "+jugador
+document.getElementById("player").innerText="Jugador: "+p
+
+loadScore()
 
 }
 
-function verCompetencia(){
+function task(t){
 
-fetch(API+"?accion=ranking")
-
-.then(r=>r.json())
-
-.then(data=>{
-
-let renzo=0
-let anita=0
-
-data.forEach(j=>{
-
-if(j.nombre=="Renzo") renzo=j.puntos
-if(j.nombre=="Anita") anita=j.puntos
-
-})
-
-let html=`
-
-<h2>🏁 Competencia</h2>
-
-<div class="puntaje">
-
-Renzo: ${renzo} / 7 puntos
-
-</div>
-
-<div class="puntaje">
-
-Anita: ${anita} / 7 puntos
-
-</div>
-
-`
-
-document.getElementById("contenido").innerHTML=html
-
-if(renzo>=7){
-
-ganador("Renzo")
-
-}
-
-if(anita>=7){
-
-ganador("Anita")
-
-}
-
-})
-
-}
-
-function verTareas(){
-
-fetch(API+"?accion=estado")
-
-.then(r=>r.json())
-
-.then(data=>{
-
-let html=""
-
-tareas.forEach(t=>{
-
-let r=data.Renzo?.includes(t)
-let a=data.Anita?.includes(t)
-
-let bloqueada = (jugador=="Renzo" && r) || (jugador=="Anita" && a)
-
-html+=`
-
-<div class="tarea ${bloqueada?'bloqueada':''}">
-
-${t}
-
-<br>
-
-Renzo: ${r?"✅":"⬜"}
-Anita: ${a?"✅":"⬜"}
-
-<br>
-
-<button onclick="completar('${t}')" ${bloqueada?'disabled':''}>
-
-Completar
-
-</button>
-
-</div>
-
-`
-
-})
-
-document.getElementById("contenido").innerHTML=html
-
-})
-
-}
-
-function completar(t){
-
-if(!jugador){
+if(player==""){
 
 alert("Selecciona jugador")
 
@@ -208,170 +180,149 @@ return
 
 }
 
-fetch(API+"?accion=tarea&jugador="+jugador+"&tarea="+t)
+fetch(API,{
+method:"POST",
+body:JSON.stringify({
+jugador:player,
+tarea:t
+})
+})
 
-alert("Tarea completada")
-
-verTareas()
-verCompetencia()
-
-}
-
-function configurarDeadline(){
-
-let html=`
-
-<h2>Configurar Deadline</h2>
-
-<input id="deadline" type="datetime-local">
-
-<br><br>
-
-<button onclick="guardarDeadline()">Guardar</button>
-
-`
-
-document.getElementById("contenido").innerHTML=html
+setTimeout(loadScore,1000)
 
 }
 
-function guardarDeadline(){
+function loadScore(){
 
-let d=document.getElementById("deadline").value
+fetch(API)
+.then(r=>r.json())
+.then(data=>{
 
-fetch(API+"?accion=deadline&valor="+d)
+let r=0
+let a=0
 
-alert("Deadline actualizado")
+for(let i=1;i<data.length;i++){
 
-}
+if(data[i][0]=="Renzo") r++
 
-function iniciarTimer(){
-
-fetch(API+"?accion=deadline")
-
-.then(r=>r.text())
-
-.then(d=>{
-
-if(!d){
-
-document.getElementById("timer").innerText="Configurar deadline"
-
-return
+if(data[i][0]=="Anita") a++
 
 }
 
-let deadline=new Date(d)
+document.getElementById("renzo").innerText=r
+document.getElementById("anita").innerText=a
 
-setInterval(()=>{
+drawBoard(r,a)
 
-let now=new Date()
+checkWinner(r,a)
 
-let diff=deadline-now
+})
+
+}
+
+function drawBoard(r,a){
+
+for(let i=1;i<=7;i++){
+
+document.getElementById("r"+i).innerText=""
+
+document.getElementById("a"+i).innerText=""
+
+}
+
+if(r<=7 && r>0) document.getElementById("r"+r).innerText="🔵"
+
+if(a<=7 && a>0) document.getElementById("a"+a).innerText="🔴"
+
+}
+
+function checkWinner(r,a){
+
+if(r>=7){
+
+document.getElementById("winner").innerText="🏆 Ganador Renzo"
+
+cupRenzo++
+
+localStorage.setItem("cupRenzo",cupRenzo)
+
+document.getElementById("cupRenzo").innerText=cupRenzo
+
+}
+
+if(a>=7){
+
+document.getElementById("winner").innerText="🏆 Ganadora Anita"
+
+cupAnita++
+
+localStorage.setItem("cupAnita",cupAnita)
+
+document.getElementById("cupAnita").innerText=cupAnita
+
+}
+
+}
+
+function updateTimer(){
+
+const now=new Date()
+
+const d=new Date(deadline)
+
+const diff=d-now
 
 if(diff<=0){
 
-terminarJuego()
+document.getElementById("timer").innerText="⛔ Semana cerrada"
 
 return
 
 }
 
-let h=Math.floor(diff/3600000)
-let m=Math.floor(diff/60000)%60
-let s=Math.floor(diff/1000)%60
+const days=Math.floor(diff/1000/60/60/24)
+
+const hours=Math.floor(diff/1000/60/60)%24
+
+const minutes=Math.floor(diff/1000/60)%60
 
 document.getElementById("timer").innerText=
 
-h+"h "+m+"m "+s+"s"
-
-},1000)
-
-})
+days+" días "+hours+" horas "+minutes+" min"
 
 }
 
-function terminarJuego(){
+setInterval(updateTimer,1000)
 
-fetch(API+"?accion=ranking")
+function restartGame(){
 
-.then(r=>r.json())
+let r=parseInt(document.getElementById("renzo").innerText)
 
-.then(data=>{
+let a=parseInt(document.getElementById("anita").innerText)
 
-let renzo=0
-let anita=0
+if(r>a){
 
-data.forEach(j=>{
+cupRenzo++
 
-if(j.nombre=="Renzo") renzo=j.puntos
-if(j.nombre=="Anita") anita=j.puntos
-
-})
-
-if(renzo>anita){
-
-ganador("Renzo")
-
-}else if(anita>renzo){
-
-ganador("Anita")
-
-}else{
-
-empate()
+localStorage.setItem("cupRenzo",cupRenzo)
 
 }
 
-})
+if(a>r){
+
+cupAnita++
+
+localStorage.setItem("cupAnita",cupAnita)
 
 }
 
-function ganador(n){
+localStorage.setItem("deadline",document.getElementById("deadlineInput").value)
 
-document.getElementById("contenido").innerHTML=
-
-`
-
-<h1>🏆 GANADOR: ${n}</h1>
-
-<h2>Premio de pareja ❤️</h2>
-
-<p>
-
-💋 10 besos
-
-🍝 cena romántica
-
-💆 masaje relajante
-
-🎬 elegir película juntos
-
-</p>
-
-`
+location.reload()
 
 }
 
-function empate(){
-
-document.getElementById("contenido").innerHTML=
-
-`
-
-<h1>🤝 Empate</h1>
-
-<p>
-
-Ambos deben celebrar con una salida juntos ❤️
-
-</p>
-
-`
-
-}
-
-iniciarTimer()
+setInterval(loadScore,4000)
 
 </script>
 
