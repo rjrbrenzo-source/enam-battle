@@ -2,19 +2,21 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>ENAM Game 🎮</title>
+<title>ENAM GAME LEGEND</title>
 
-<meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link rel="manifest" href="manifest.json">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <style>
 
 body{
 font-family:Arial;
-background:#0f172a;
+background:#020617;
 color:white;
 text-align:center;
+}
+
+h1{
+color:#38bdf8;
 }
 
 button{
@@ -24,64 +26,79 @@ border-radius:10px;
 border:none;
 background:#38bdf8;
 color:white;
-font-size:16px;
+font-size:15px;
 }
 
-.tablero{
+#tablero{
 display:grid;
-grid-template-columns:repeat(8,40px);
-gap:6px;
+grid-template-columns:repeat(5,70px);
+gap:8px;
 justify-content:center;
 margin-top:20px;
 }
 
 .casilla{
-width:40px;
-height:40px;
+width:70px;
+height:70px;
 background:#1e293b;
-border-radius:8px;
+border-radius:14px;
+position:relative;
 }
 
-.fichaA{
+.meta{
 background:#22c55e;
 }
 
-.fichaB{
+.renzo{
+width:22px;
+height:22px;
+background:#22c55e;
+border-radius:50%;
+position:absolute;
+top:24px;
+left:8px;
+}
+
+.anita{
+width:22px;
+height:22px;
 background:#f43f5e;
+border-radius:50%;
+position:absolute;
+top:24px;
+right:8px;
 }
 
 .tarea{
 background:#1e293b;
 padding:10px;
-margin:5px;
+margin:10px;
 border-radius:10px;
 }
 
-.bloqueada{
+.completada{
 opacity:0.4;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<h1>🎮 ENAM Game</h1>
+<h1>🎮 ENAM GAME</h1>
 
-<h3 id="jugadorActual"></h3>
+<h3 id="jugador"></h3>
 
 <h2>⏳ Tiempo restante</h2>
-<h3 id="timer"></h3>
+<h2 id="timer"></h2>
 
-<button onclick="mostrar('tablero')">Tablero</button>
-<button onclick="mostrar('tareas')">Tareas</button>
-<button onclick="mostrar('ranking')">Ranking</button>
-<button onclick="mostrar('admin')">Admin</button>
+<button onclick="pantallaTablero()">🎮 Tablero</button>
+<button onclick="pantallaTareas()">📚 Tareas</button>
+<button onclick="pantallaRanking()">🏆 Ranking</button>
+<button onclick="pantallaAdmin()">⚙️ Admin</button>
 
-<div id="tablero"></div>
-<div id="tareas"></div>
-<div id="ranking"></div>
-<div id="admin"></div>
+<div id="contenido"></div>
 
 <script>
 
@@ -94,9 +111,9 @@ jugador=prompt("Escribe tu nombre: Renzo o Anita")
 localStorage.setItem("jugador",jugador)
 }
 
-document.getElementById("jugadorActual").innerText="Jugador: "+jugador
+document.getElementById("jugador").innerText="Jugador: "+jugador
 
-const tareasLista=[
+const tareas=[
 
 "Curso 1 qx: Resumen base",
 "Curso 1 qx: Eva",
@@ -108,50 +125,80 @@ const tareasLista=[
 
 ]
 
-function mostrar(p){
+function pantallaTablero(){
 
-document.getElementById("tablero").style.display="none"
-document.getElementById("tareas").style.display="none"
-document.getElementById("ranking").style.display="none"
-document.getElementById("admin").style.display="none"
+fetch(API+"?accion=ranking")
+.then(r=>r.json())
+.then(data=>{
 
-document.getElementById(p).style.display="block"
+let renzo=0
+let anita=0
 
-}
+data.forEach(j=>{
 
-function cargarTablero(){
+if(j.nombre=="Renzo") renzo=j.puntos
+if(j.nombre=="Anita") anita=j.puntos
 
-let html="<div class='tablero'>"
+})
 
-for(let i=0;i<20;i++){
+let html="<div id='tablero'>"
 
-html+="<div class='casilla' id='c"+i+"'></div>"
+for(let i=0;i<15;i++){
+
+let clase="casilla"
+
+if(i==14) clase="casilla meta"
+
+html+=`<div class="${clase}">`
+
+if(i==renzo) html+=`<div class="renzo"></div>`
+if(i==anita) html+=`<div class="anita"></div>`
+
+html+="</div>"
 
 }
 
 html+="</div>"
 
-document.getElementById("tablero").innerHTML=html
+document.getElementById("contenido").innerHTML=html
+
+if(renzo>=7 || anita>=7){
+
+ganador(renzo>anita?"Renzo":"Anita")
 
 }
 
-function cargarTareas(){
+})
+
+}
+
+function pantallaTareas(){
 
 let html=""
 
-tareasLista.forEach(t=>{
+tareas.forEach(t=>{
 
 html+=`
-<div class='tarea'>
+
+<div class="tarea">
+
 ${t}
+
 <br>
-<button onclick="completar('${t}')">Completar</button>
+
+<button onclick="completar('${t}')">
+
+Completar
+
+</button>
+
 </div>
+
 `
 
 })
 
-document.getElementById("tareas").innerHTML=html
+document.getElementById("contenido").innerHTML=html
 
 }
 
@@ -159,13 +206,13 @@ function completar(t){
 
 fetch(API+"?accion=tarea&jugador="+jugador+"&tarea="+t)
 
-alert("Tarea completada!")
+alert("✅ Tarea completada")
 
-cargarRanking()
+pantallaTablero()
 
 }
 
-function cargarRanking(){
+function pantallaRanking(){
 
 fetch(API+"?accion=ranking")
 .then(r=>r.json())
@@ -173,35 +220,51 @@ fetch(API+"?accion=ranking")
 
 let html="<h2>🏆 Ranking</h2>"
 
+data.sort((a,b)=>b.puntos-a.puntos)
+
 data.forEach(j=>{
 
-html+=j.nombre+" : "+j.puntos+" pts<br>"
+html+=`<p>${j.nombre} — ${j.puntos} puntos</p>`
 
 })
 
-document.getElementById("ranking").innerHTML=html
+document.getElementById("contenido").innerHTML=html
 
 })
 
 }
 
-function adminPanel(){
+function pantallaAdmin(){
 
 let html=`
 
 <h2>ADMIN</h2>
 
+Deadline:
+
+<br>
+
 <input id="deadline" type="datetime-local">
 
 <br><br>
 
-<button onclick="guardarDeadline()">Guardar Deadline</button>
+<button onclick="guardarDeadline()">
 
-<button onclick="reiniciar()">Reiniciar Juego</button>
+Guardar deadline
+
+</button>
+
+<br><br>
+
+<button onclick="reset()">
+
+Reiniciar juego
+
+</button>
 
 `
 
-document.getElementById("admin").innerHTML=html
+document.getElementById("contenido").innerHTML=html
 
 }
 
@@ -211,19 +274,19 @@ let d=document.getElementById("deadline").value
 
 fetch(API+"?accion=deadline&valor="+d)
 
-alert("Deadline actualizado")
+alert("⏳ Deadline actualizado")
 
 }
 
-function reiniciar(){
+function reset(){
 
 fetch(API+"?accion=reset")
 
-alert("Nuevo juego iniciado")
+alert("🔄 Juego reiniciado")
 
 }
 
-function timer(){
+function iniciarTimer(){
 
 fetch(API+"?accion=deadline")
 
@@ -239,6 +302,14 @@ let now=new Date()
 
 let diff=deadline-now
 
+if(diff<0){
+
+document.getElementById("timer").innerText="FIN DEL JUEGO"
+
+return
+
+}
+
 let h=Math.floor(diff/3600000)
 let m=Math.floor(diff/60000)%60
 let s=Math.floor(diff/1000)%60
@@ -251,13 +322,30 @@ document.getElementById("timer").innerText=h+"h "+m+"m "+s+"s"
 
 }
 
-cargarTablero()
-cargarTareas()
-cargarRanking()
-adminPanel()
-timer()
+function ganador(nombre){
+
+document.getElementById("contenido").innerHTML=
+
+`<h1>🏆 GANADOR</h1>
+
+<h2>${nombre}</h2>
+
+<p>
+
+El perdedor debe dar un premio romántico ❤️
+
+</p>
+
+`
+
+}
+
+pantallaTablero()
+
+iniciarTimer()
 
 </script>
 
 </body>
+
 </html>
