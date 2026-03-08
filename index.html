@@ -7,6 +7,8 @@
 
 <title>ENAM Battle</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+
 <style>
 
 body{
@@ -19,15 +21,18 @@ background:#f2f2f2;
 display:flex;
 justify-content:center;
 flex-wrap:wrap;
+margin:20px;
 }
 
 .cell{
+
 width:60px;
 height:60px;
 border:2px solid black;
 margin:5px;
 border-radius:10px;
 background:white;
+
 }
 
 .renzo{
@@ -39,8 +44,10 @@ background:red;
 }
 
 button{
+
 padding:10px;
 margin:5px;
+
 }
 
 </style>
@@ -50,6 +57,8 @@ margin:5px;
 <body>
 
 <h1>🏆 ENAM BATTLE</h1>
+
+<h3>Jugador</h3>
 
 <select id="player">
 
@@ -72,8 +81,10 @@ margin:5px;
 
 <script>
 
-let renzo=0
-let pareja=0
+const supabase = supabase.createClient(
+"https://saqpncdtyiosuffjjxrj.supabase.co",
+"sb_publishable_8kfDSywSHxo2jzK0cB9VUQ_J2jGVeP8"
+)
 
 const tasks=[
 
@@ -106,24 +117,45 @@ tasks.forEach(t=>{
 let btn=document.createElement("button")
 btn.innerText=t
 
-btn.onclick=()=>completeTask()
+btn.onclick=()=>completeTask(t)
 
 tasksDiv.appendChild(btn)
 
 })
 
-function completeTask(){
+async function completeTask(task){
 
 let player=document.getElementById("player").value
 
-if(player=="Renzo") renzo++
-if(player=="Pareja") pareja++
+await supabase
+.from("progress")
+.insert({player,task})
 
-updateBoard()
+loadProgress()
 
 }
 
-function updateBoard(){
+async function loadProgress(){
+
+const {data}=await supabase
+.from("progress")
+.select("*")
+
+let renzo=0
+let pareja=0
+
+data.forEach(r=>{
+
+if(r.player=="Renzo") renzo++
+if(r.player=="Pareja") pareja++
+
+})
+
+updateBoard(renzo,pareja)
+
+}
+
+function updateBoard(r,p){
 
 for(let i=0;i<tasks.length;i++){
 
@@ -132,23 +164,27 @@ document.getElementById("cell"+i).classList.remove("pareja")
 
 }
 
-if(renzo>0){
+if(r>0){
 
-document.getElementById("cell"+(renzo-1)).classList.add("renzo")
+document.getElementById("cell"+(r-1)).classList.add("renzo")
 
 }
 
-if(pareja>0){
+if(p>0){
 
-document.getElementById("cell"+(pareja-1)).classList.add("pareja")
+document.getElementById("cell"+(p-1)).classList.add("pareja")
 
 }
 
 document.getElementById("score").innerText=
 
-"Renzo: "+renzo+" | Pareja: "+pareja
+"Renzo: "+r+" | Pareja: "+p
 
 }
+
+setInterval(loadProgress,2000)
+
+loadProgress()
 
 </script>
 
