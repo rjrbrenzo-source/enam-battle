@@ -1,13 +1,12 @@
 <!DOCTYPE html>
 <html>
+
 <head>
 
 <meta charset="UTF-8">
 <title>ENAM Game</title>
 
 <meta name="viewport" content="width=device-width, initial-scale=1">
-
-<link rel="manifest" href="manifest.json">
 
 <style>
 
@@ -20,54 +19,12 @@ text-align:center;
 
 button{
 padding:10px;
-margin:6px;
+margin:5px;
 border-radius:10px;
 border:none;
 background:#38bdf8;
 color:white;
-font-size:16px;
-}
-
-.tablero{
-display:grid;
-grid-template-columns:repeat(4,70px);
-gap:8px;
-justify-content:center;
-margin-top:20px;
-}
-
-.casilla{
-width:70px;
-height:70px;
-background:#1e293b;
-border-radius:12px;
-position:relative;
-}
-
-.meta{
-background:#22c55e;
-}
-
-.renzo{
-width:22px;
-height:22px;
-background:#22c55e;
-border-radius:50%;
-position:absolute;
-top:22px;
-left:8px;
-transition:all 0.4s;
-}
-
-.anita{
-width:22px;
-height:22px;
-background:#f43f5e;
-border-radius:50%;
-position:absolute;
-top:22px;
-right:8px;
-transition:all 0.4s;
+font-size:15px;
 }
 
 .tarea{
@@ -77,18 +34,19 @@ padding:10px;
 border-radius:10px;
 }
 
-.barra{
-width:200px;
-height:20px;
-background:#1e293b;
-border-radius:10px;
-margin:auto;
+.bloqueada{
+opacity:0.4;
 }
 
-.progreso{
-height:20px;
-background:#22c55e;
-border-radius:10px;
+table{
+margin:auto;
+border-collapse:collapse;
+margin-top:10px;
+}
+
+td,th{
+border:1px solid white;
+padding:8px;
 }
 
 </style>
@@ -99,7 +57,10 @@ border-radius:10px;
 
 <h1>🎮 ENAM GAME</h1>
 
-<h3>Selecciona jugador</h3>
+<h3>Curso 1: Ginecología</h3>
+<h3>Curso 2: Neurología</h3>
+
+<h3>Seleccionar jugador</h3>
 
 <button onclick="setJugador('Renzo')">Jugador Renzo</button>
 <button onclick="setJugador('Anita')">Jugador Anita</button>
@@ -109,9 +70,9 @@ border-radius:10px;
 <h2>⏳ Tiempo restante</h2>
 <h2 id="timer"></h2>
 
-<button onclick="verTablero()">🎮 Tablero</button>
+<button onclick="verPuntaje()">📊 Puntaje</button>
 <button onclick="verTareas()">📚 Tareas</button>
-<button onclick="verAdmin()">⚙️ Admin</button>
+<button onclick="configurarDeadline()">⏱ Deadline</button>
 
 <div id="contenido"></div>
 
@@ -120,8 +81,6 @@ border-radius:10px;
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
 
 let jugador=""
-
-let copas=JSON.parse(localStorage.getItem("copas")) || {Renzo:0,Anita:0}
 
 const tareas=[
 
@@ -143,7 +102,7 @@ document.getElementById("jugador").innerText="Jugador: "+jugador
 
 }
 
-function verTablero(){
+function verPuntaje(){
 
 fetch(API+"?accion=ranking")
 
@@ -163,53 +122,45 @@ if(j.nombre=="Anita") anita=j.puntos
 
 let html=`
 
-<h3>🏆 Copas</h3>
+<h2>📊 Tabla de Puntaje</h2>
 
-Renzo 🏆 ${copas.Renzo} |
-Anita 🏆 ${copas.Anita}
+<table>
 
-<br><br>
+<tr>
+<th>Jugador</th>
+<th>Puntos</th>
+<th>Meta</th>
+</tr>
 
-Renzo
+<tr>
+<td>Renzo</td>
+<td>${renzo}</td>
+<td>7</td>
+</tr>
 
-<div class="barra">
-<div class="progreso" style="width:${renzo*14}%"></div>
-</div>
+<tr>
+<td>Anita</td>
+<td>${anita}</td>
+<td>7</td>
+</tr>
 
-<br>
-
-Anita
-
-<div class="barra">
-<div class="progreso" style="width:${anita*14}%"></div>
-</div>
+</table>
 
 `
 
-html+="<div class='tablero'>"
+document.getElementById("contenido").innerHTML=html
 
-for(let i=0;i<7;i++){
+if(renzo>=7){
 
-let clase="casilla"
-
-if(i==6) clase="casilla meta"
-
-html+=`<div class="${clase}">`
-
-if(i==renzo) html+=`<div class="renzo"></div>`
-if(i==anita) html+=`<div class="anita"></div>`
-
-html+="</div>"
+ganador("Renzo")
 
 }
 
-html+="</div>"
+if(anita>=7){
 
-document.getElementById("contenido").innerHTML=html
+ganador("Anita")
 
-if(renzo>=7) ganador("Renzo")
-
-if(anita>=7) ganador("Anita")
+}
 
 })
 
@@ -232,19 +183,19 @@ let a=data.Anita?.includes(t)
 
 html+=`
 
-<div class="tarea">
+<div class="tarea ${r&&jugador=='Renzo'||a&&jugador=='Anita'?'bloqueada':''}">
 
 ${t}
 
 <br>
 
 Renzo: ${r?"✅":"⬜"}
-
 Anita: ${a?"✅":"⬜"}
 
 <br>
 
-<button onclick="completar('${t}')">
+<button onclick="completar('${t}')" 
+${r&&jugador=='Renzo'||a&&jugador=='Anita'?'disabled':''}>
 
 Completar
 
@@ -274,17 +225,19 @@ return
 
 fetch(API+"?accion=tarea&jugador="+jugador+"&tarea="+t)
 
-alert("Tarea marcada")
+alert("Tarea completada")
 
 verTareas()
 
+verPuntaje()
+
 }
 
-function verAdmin(){
+function configurarDeadline(){
 
 let html=`
 
-<h2>Administrador</h2>
+<h2>Configurar Deadline</h2>
 
 <input id="deadline" type="datetime-local">
 
@@ -292,15 +245,7 @@ let html=`
 
 <button onclick="guardarDeadline()">
 
-Guardar Deadline
-
-</button>
-
-<br><br>
-
-<button onclick="reset()">
-
-Reiniciar Juego
+Guardar
 
 </button>
 
@@ -317,14 +262,6 @@ let d=document.getElementById("deadline").value
 fetch(API+"?accion=deadline&valor="+d)
 
 alert("Deadline actualizado")
-
-}
-
-function reset(){
-
-fetch(API+"?accion=reset")
-
-alert("Juego reiniciado")
 
 }
 
@@ -368,23 +305,19 @@ h+"h "+m+"m "+s+"s"
 
 function ganador(n){
 
-copas[n]++
-
-localStorage.setItem("copas",JSON.stringify(copas))
-
 document.getElementById("contenido").innerHTML=
 
 `
 
 <h1>🏆 ${n} GANÓ</h1>
 
-<h2>Premio romántico ❤️</h2>
+<h2>Premio de pareja ❤️</h2>
 
 <p>
 
 💋 10 besos
 
-🍝 Cena preparada
+🍝 Cena romántica
 
 💆 Masaje relajante
 
