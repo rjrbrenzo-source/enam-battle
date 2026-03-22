@@ -126,8 +126,7 @@ Deadline: 29 Marzo 2026 – 11:50 PM
 <div class="cell" id="c3">3</div>
 <div class="cell" id="c4">4</div>
 <div class="cell" id="c5">5</div>
-<div class="cell" id="c6">6</div>
-<div class="cell" id="c7">META</div>
+<div class="cell" id="c6">META</div>
 </div>
 
 <h2>Puntaje</h2>
@@ -216,13 +215,14 @@ else if(e.Anita){ btn.innerText=tareas[i]+" A"; btn.classList.add("anitaColor") 
 }
 
 function drawPieces(r,a){
-for(let i=0;i<=7;i++){
+for(let i=0;i<=6;i++){
 if(i==0) document.getElementById("c"+i).innerHTML="Inicio"
-else if(i==7) document.getElementById("c"+i).innerHTML="META"
+else if(i==6) document.getElementById("c"+i).innerHTML="META"
 else document.getElementById("c"+i).innerHTML=i
 }
-let rCell=document.getElementById("c"+Math.min(r,7))
-let aCell=document.getElementById("c"+Math.min(a,7))
+
+let rCell=document.getElementById("c"+Math.min(r,6))
+let aCell=document.getElementById("c"+Math.min(a,6))
 
 rCell.innerHTML+=" R"
 aCell.innerHTML+=" A"
