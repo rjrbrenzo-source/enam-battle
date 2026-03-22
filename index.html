@@ -17,16 +17,20 @@
 body{
   font-family: Arial;
   text-align: center;
-  background: url("https://images.unsplash.com/photo-1588776814546-1ffcf47267a5") no-repeat center center fixed;
+  background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+  url("https://images.unsplash.com/photo-1579684385127-1ef15d508118");
   background-size: cover;
+  background-position: center;
+  color: white;
   font-size: 22px;
   margin:0;
   padding:0;
 }
 
-/* Transparencias para leer bien */
+/* Transparencias */
 .info, .winnerBox, .cell{
   background: rgba(255,255,255,0.9);
+  color: black;
 }
 
 .info{
@@ -75,6 +79,7 @@ button:disabled{
   justify-content: center;
   font-size: 24px;
   font-weight:bold;
+  transition: transform 0.3s;
 }
 
 .winnerBox{
@@ -140,8 +145,13 @@ Anita: <span id="anita">0</span>
 <script>
 
 // 🔊 SONIDOS
-const clickSound = new Audio("https://www.soundjay.com/buttons/sounds/button-16.mp3");
-const winSound = new Audio("https://www.soundjay.com/misc/sounds/bell-ringing-05.mp3");
+const clickSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3");
+const winSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3");
+
+// 🔓 desbloquear audio
+document.body.addEventListener("click", () => {
+  clickSound.play().catch(()=>{});
+}, { once: true });
 
 let player=""
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
@@ -157,7 +167,9 @@ const tareas=[
 "Curso 2 Neurología: Casos esenciales"
 ]
 
-const premios=[ /* (tu lista intacta) */ ]
+const premios=[
+"Cena romántica 🍝","Masaje de 30 min 💆","Película elegida 🎬","Desayuno en cama ☕","Salida sorpresa 🌅"
+]
 
 function setPlayer(p){
 player=p
@@ -171,7 +183,7 @@ function task(i){
 if(gameEnded()){ alert("El juego terminó"); return }
 if(player==""){ alert("Selecciona jugador"); return }
 
-clickSound.play(); // 🔊
+clickSound.play();
 
 fetch(API,{method:"POST", body:JSON.stringify({jugador:player,tarea:tareas[i]})})
 setTimeout(loadScore,800)
@@ -218,8 +230,14 @@ if(i==0) document.getElementById("c"+i).innerHTML="Inicio"
 else if(i==7) document.getElementById("c"+i).innerHTML="META"
 else document.getElementById("c"+i).innerHTML=i
 }
-document.getElementById("c"+Math.min(r,7)).innerHTML+=" R"
-document.getElementById("c"+Math.min(a,7)).innerHTML+=" A"
+let rCell=document.getElementById("c"+Math.min(r,7))
+let aCell=document.getElementById("c"+Math.min(a,7))
+
+rCell.innerHTML+=" R"
+aCell.innerHTML+=" A"
+
+rCell.style.transform="scale(1.2)"
+aCell.style.transform="scale(1.2)"
 }
 
 function checkLeader(r,a){
@@ -230,7 +248,7 @@ else document.getElementById("leader").innerText="Empate"
 
 function premiosAleatorios(){
 let copia=Array.from(premios), seleccion=[]
-for(let i=0;i<5;i++){
+for(let i=0;i<Math.min(5,copia.length);i++){
 let idx=Math.floor(Math.random()*copia.length)
 seleccion.push(copia[idx])
 copia.splice(idx,1)
@@ -239,7 +257,7 @@ return seleccion.join("<br>")
 }
 
 function showPrizes(winner){
-winSound.play(); // 🎉
+winSound.play();
 
 document.getElementById("winner").innerHTML=
 `<div class="winnerBox">
