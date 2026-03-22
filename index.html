@@ -4,10 +4,8 @@
 <meta charset="UTF-8">
 <title>ENAM Battle</title>
 
-<!-- Responsive móvil -->
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<!-- Iconos para app -->
 <link rel="icon" type="image/png" sizes="512x512" href="icon.png">
 <link rel="apple-touch-icon" sizes="180x180" href="icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -27,7 +25,6 @@ body{
   padding:0;
 }
 
-/* Transparencias */
 .info, .winnerBox, .cell{
   background: rgba(255,255,255,0.9);
   color: black;
@@ -99,11 +96,11 @@ h3{ font-size: 32px; }
 <h1>ENAM Battle</h1>
 
 <div class="info">
-<b>Semana 1</b>
+<b>Semana 2 QX</b>
 <br>
-Curso 1: Ginecología | Curso 2: Neurología
+Curso 1: Neumo - Curso 2: Infecto
 <br>
-Deadline: 15 Marzo 2026 – 11:00 PM
+Deadline: 29 Marzo 2026 – 11:50 PM
 <br>
 <span id="timer">Cargando...</span>
 </div>
@@ -114,13 +111,12 @@ Deadline: 15 Marzo 2026 – 11:00 PM
 <h3 id="player"></h3>
 
 <h2>Tareas</h2>
-<button id="t0" onclick="task(0)">Curso 1 Ginecología: Resumen base</button>
-<button id="t1" onclick="task(1)">Curso 1 Ginecología: Eva</button>
-<button id="t2" onclick="task(2)">Curso 1 Ginecología: Estudia conmigo</button>
-<button id="t3" onclick="task(3)">Curso 2 Neurología: Org mental</button>
-<button id="t4" onclick="task(4)">Curso 2 Neurología: Resumen base</button>
-<button id="t5" onclick="task(5)">Curso 2 Neurología: Banqueo</button>
-<button id="t6" onclick="task(6)">Curso 2 Neurología: Casos esenciales</button>
+<button id="t0" onclick="task(0)">Curso 1: Resumen base</button>
+<button id="t1" onclick="task(1)">Curso 1: Eva + Resolucion</button>
+<button id="t2" onclick="task(2)">Curso 1: Estudia conmigo</button>
+<button id="t3" onclick="task(3)">Curso 2: Resumen base</button>
+<button id="t4" onclick="task(4)">Curso 2: Eva + Resolucion</button>
+<button id="t5" onclick="task(5)">Curso 2: Estudia conmigo</button>
 
 <h2>Tablero</h2>
 <div class="board">
@@ -144,32 +140,27 @@ Anita: <span id="anita">0</span>
 
 <script>
 
-// 🔊 SONIDOS
 const clickSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-select-click-1109.mp3");
 const winSound = new Audio("https://assets.mixkit.co/sfx/preview/mixkit-winning-chimes-2015.mp3");
 
-// 🔓 desbloquear audio
 document.body.addEventListener("click", () => {
   clickSound.play().catch(()=>{});
 }, { once: true });
 
 let player=""
 const API="https://script.google.com/macros/s/AKfycbwYSN53Pnxw_YMJ7f99-JBbz-XUdLg6OZjrIn8rrI0jMKNMQslk0hyqMGUYFjBe0qxTWg/exec"
-const DEADLINE=new Date("2026-03-15T23:00:00")
+const DEADLINE=new Date("2026-03-29T23:50:00")
 
 const tareas=[
-"Curso 1 Ginecología: Resumen base",
-"Curso 1 Ginecología: Eva",
-"Curso 1 Ginecología: Estudia conmigo",
-"Curso 2 Neurología: Org mental",
-"Curso 2 Neurología: Resumen base",
-"Curso 2 Neurología: Banqueo",
-"Curso 2 Neurología: Casos esenciales"
+"Curso 1: Resumen base",
+"Curso 1: Eva + Resolucion",
+"Curso 1: Estudia conmigo",
+"Curso 2: Resumen base",
+"Curso 2: Eva + Resolucion",
+"Curso 2: Estudia conmigo"
 ]
 
-const premios=[
-"Cena romántica 🍝","Masaje de 30 min 💆","Película elegida 🎬","Desayuno en cama ☕","Salida sorpresa 🌅"
-]
+const premios=["Cena romántica 🍝","Masaje 💆","Película 🎬","Desayuno ☕","Salida 🌅"]
 
 function setPlayer(p){
 player=p
@@ -258,18 +249,17 @@ return seleccion.join("<br>")
 
 function showPrizes(winner){
 winSound.play();
-
 document.getElementById("winner").innerHTML=
 `<div class="winnerBox">
 🏆 ${winner} ganó el ENAM Battle
-<h3>Premios para parejas 💑</h3>
+<h3>Premios 💑</h3>
 ${premiosAleatorios()}
 </div>`
 }
 
 function checkWinner(r,a){
-if(r>=7){ disableButtons(); showPrizes("Renzo"); return }
-if(a>=7){ disableButtons(); showPrizes("Anita"); return }
+if(r>=6){ disableButtons(); showPrizes("Renzo"); return }
+if(a>=6){ disableButtons(); showPrizes("Anita"); return }
 if(gameEnded()){ disableButtons()
 if(r>a){ showPrizes("Renzo") }
 else if(a>r){ showPrizes("Anita") }
